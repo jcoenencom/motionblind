@@ -10,7 +10,7 @@ A firne dof mine has BREL motors that are controlable by Homeassistant and would
 
 The motors are connected through a [BREL HUB](https://www.brel-home.nl/nl/pro/producten/smart-home/353/hub-03) (ethernet/RF) and a library alread exist in python (the one used by homeassistant)
 
-https://github.com/starkillerOG/motion-blinds
+[motion-blinds library](https://github.com/starkillerOG/motion-blinds)
 
 In order to use python code in fhem the [fhempy](https://github.com/fhempy/fhempy/tree/master) module has to be installed:
 
