@@ -32,4 +32,11 @@ In fhem's command line do:
     
     define fhempy_local BindingsIo fhempy
 
+
+In orer to include the library do the following in a terminal, the first line defines the virtual python environement, the se'cond installs the library in it.
+
+    source /opt/fhem/.fhempy/fhempy_venv/bin/activate
+    
+    pip install motionblinds
+
 The module should normally come up.
