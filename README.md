@@ -48,6 +48,7 @@ In orer to include the library do the following in a terminal, the first line de
 
 To install the module, download motionblinds [master.zip](https://github.com/jcoenencom/motionblind) from github (the green <> CODE button on the top right, select Download ZIP) and unzip it
 Rename the directory to motionblinds
+
  mv motionblind-master motionblinds
 
 and copy the directory to fhempy libs and update the access rights
