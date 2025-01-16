@@ -4,7 +4,7 @@ README.md
 
 ## An FHEMPY module to make use of motionblinds python library
 
-By the way this is my first attempts to define a python module for FHEM
+By the way this is my first attempt to define a python module for FHEM
 
 A firne dof mine has BREL motors that are controlable by Homeassistant and would like his fhem instance to pilot them as well. 
 
