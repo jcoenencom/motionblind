@@ -14,13 +14,17 @@ The motors are connected through a [BREL HUB](https://www.brel-home.nl/nl/pro/pr
 
 In order to use python code in fhem the [fhempy](https://github.com/fhempy/fhempy/tree/master) module has to be installed:
 
-Dependencies:
+# Install fhempy
+
+### Dependencies:
 
 in a terminal, issue the following command:
 
     sudo apt install python3 python3-pip python3-dev python3-venv libffi-dev libssl-dev libjpeg-dev zlib1g-dev autoconf build-essential libglib2.0-dev libdbus-1-dev bluez libbluetooth-dev git libprotocol-websocket-perl
     
     sudo cpan Protocol::WebSocket
+
+### Install and define fhempy
 
 In fhem's command line do:
 
@@ -32,12 +36,20 @@ In fhem's command line do:
     
     define fhempy_local BindingsIo fhempy
 
+### Installation of motionblind library in fhem python environement
 
 In orer to include the library do the following in a terminal, the first line defines the virtual python environement, the se'cond installs the library in it.
 
     source /opt/fhem/.fhempy/fhempy_venv/bin/activate
     
     pip install motionblinds
+
+### install the fhempy module
+
+To install the module, download motionblinds directory and copy it to fhempy module lib
+
+ 
+
 
 The module should normally come up.
 
