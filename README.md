@@ -41,7 +41,7 @@ In orer to include the library do the following in a terminal, the first line de
 
 The module should normally come up.
 
-State of development:
+## State of development:
 
 Class motionblind is defined
 
