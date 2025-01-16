@@ -40,3 +40,5 @@ In orer to include the library do the following in a terminal, the first line de
     pip install motionblinds
 
 The module should normally come up.
+
+![device](Screenshot 2025-01-16 at 12.35.29.png)
