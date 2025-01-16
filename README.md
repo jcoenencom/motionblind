@@ -53,9 +53,9 @@ Rename the directory to motionblinds
 
 and copy the directory to fhempy libs and update the access rights
 
- sudo cp -r motionblinds /opt/fhem/.fhempy/fhempy_venv/lib/python3.11/site-packages/fhempy/lib/motionblinds
- sudo chown -R fhem /opt/fhem/.fhempy/fhempy_venv/lib/python3.11/site-packages/fhempy/lib/motionblinds
- sudo chgrp -R dialout /opt/fhem/.fhempy/fhempy_venv/lib/python3.11/site-packages/fhempy/lib/motionblinds
+    sudo cp -r motionblinds /opt/fhem/.fhempy/fhempy_venv/lib/python3.11/site-packages/fhempy/lib/motionblinds
+    sudo chown -R fhem /opt/fhem/.fhempy/fhempy_venv/lib/python3.11/site-packages/fhempy/lib/motionblinds
+    sudo chgrp -R dialout /opt/fhem/.fhempy/fhempy_venv/lib/python3.11/site-packages/fhempy/lib/motionblinds
 
 The module should normally come up.
 
