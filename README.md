@@ -41,4 +41,15 @@ In orer to include the library do the following in a terminal, the first line de
 
 The module should normally come up.
 
-![device](images/device.png)
+State of development:
+
+Class motionblind is defined
+
+A device can be created in fhem
+
+    define brel fhempy motionblinds IP_address key
+
+Where IP_address is the IP address of the motionblinds compatible hub
+key is the key to grant access to the Hub functionalities.
+
+![Device created on fhem](images/device.png)
