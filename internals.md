@@ -31,7 +31,7 @@ Is to be followed by
 
 In order to get the devices defined on the gateway (populate the m.device_list dict with devices).
 
-for blind in m.device_list.values():
+ for blind in m.device_list.values():
     blind.Update()
     print(blind)
 will provide this data
