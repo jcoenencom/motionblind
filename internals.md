@@ -20,3 +20,24 @@ The motion-blinds library defines objects
 + class MotionTopDownBottomUp(MotionBlind): Sub class representing a Top Down Bottom Up blind connected to the Motion Gateway.
 
 
+## Connecting the gateway
+
+    from motionblinds import MotionGateway
+    m = MotionGateway(ip = "192.168.1.100", key = "12ab345c-d67e-8f")
+
+Is to be followed by
+
+    m.device_list
+
+In order to get the devices defined on the gateway (populate the m.device_list dict with devices).
+
+for blind in m.device_list.values():
+    blind.Update()
+    print(blind)
+will provide this data
+
+<MotionBlind mac: abcdefghujkl0001, type: RollerBlind, status: Stopped, position: 0 %, angle: 0, limit: Limits, battery: 1195, RSSI: -82 dBm>
+
+Which is a representation of the Blind Object's variables, this is something tha we can use to extract data for fhem the representation.
+
+Although it lokks like a dict, it is not directly usable in python and needs to be converted.
