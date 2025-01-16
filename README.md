@@ -46,10 +46,15 @@ In orer to include the library do the following in a terminal, the first line de
 
 ### install the fhempy module
 
-To install the module, download motionblinds directory and copy it to fhempy module lib
+To install the module, download motionblinds [master.zip](https://github.com/jcoenencom/motionblind) from github and unzip it
+Rename the directory to motionblinds
+ mv motionblind-master motionblinds
 
- 
+and copy the directory to fhempy libs and update the access rights
 
+ sudo cp -r motionblinds /opt/fhem/.fhempy/fhempy_venv/lib/python3.11/site-packages/fhempy/lib/motionblinds
+ sudo chown -R fhem /opt/fhem/.fhempy/fhempy_venv/lib/python3.11/site-packages/fhempy/lib/motionblinds
+ sudo chgrp -R dialout /opt/fhem/.fhempy/fhempy_venv/lib/python3.11/site-packages/fhempy/lib/motionblinds
 
 The module should normally come up.
 
