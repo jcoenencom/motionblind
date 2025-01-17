@@ -37,14 +37,14 @@ To extract the list of devices:
         blind.Update()
         print(blind)
 
-#### NOTE The Update method is necessary as the library does not poll the gateway to get the latest state of the devices, so it is necessary to issue an update in order to have the correct state of the devices.
+#### NOTE: The Update method is necessary as the library does not poll the gateway to get the latest state of the devices, so it is necessary to issue an update in order to have the correct state of the devices.
 
 will provide this type of data, which is a string representation (__repr__) of the object
 
     <MotionBlind mac: abcdefghujkl0001, type: RollerBlind, status: Stopped, position: 0 %, angle: 0, limit: Limits, battery: 1195, RSSI: -82 dBm>
     <MotionBlind mac: abcdefghujkl0001, type: RollerBlind, status: stopped, position: 0 &, angle: 0.0, limit BothLimitsDetected, battery: DC, 103.0 %,12.4 V, charging: False, RSSI: -53 dBm, com: BiDirection>
     
-Which is a representation of the Blind Object's variables, this is something tha we can use to extract data for fhem the representation.
+Which is a representation of the Blind Object's variables, this is something that we can use to extract data for fhem the representation.
 
 Although it looks like a dict, it is not directly usable in python and needs to be converted (and it's not written to be used by eval to recreate the object).
 
@@ -59,4 +59,6 @@ So defining a object using (an unspecified argument will be defaulted to its pre
 
         MBObject = MotionBlind(gateway=mgw, mac=blind_mac, device_type='RollerBlind')
 
+#### Note: the class MotionBlind is not available for import in python with the standard library, in order to use it one has to edit __init__.py file in the library package and insert the following
+    from .motion_blinds import MotionBlind
         
