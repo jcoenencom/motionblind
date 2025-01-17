@@ -33,9 +33,9 @@ using GetDeviceList gateway method
 ### Now the instance of the GateWay knows the devices known by the physical gateway
 To extract the list of devices:
 
- for blind in m.device_list.values():
-    blind.Update()
-    print(blind)
+    for blind in m.device_list.values():
+        blind.Update()
+        print(blind)
 
 #### NOTE The Update method is necessary as the library does not poll the gateway to get the latest state of the devices, so it is necessary to issue an update in order to have the correct state of the devices.
 
