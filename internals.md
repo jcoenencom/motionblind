@@ -25,23 +25,28 @@ The motion-blinds library defines objects
     from motionblinds import MotionGateway
     m = MotionGateway(ip = "192.168.1.100", key = "12ab345c-d67e-8f")
 
-Is to be followed by
+### The gateway holds a device list that is populated by a request to the gateway itself 
+using GetDeviceList gateway method
 
-    m.device_list
+    m.GetDeviceList()
 
-In order to get the devices defined on the gateway (populate the m.device_list dict with devices).
+### Now the instance of the GateWay knows the devices known by the physical gateway
+To extract the list of devices:
 
  for blind in m.device_list.values():
     blind.Update()
     print(blind)
 
+#### NOTE The Update method is necessary as the library does not poll the gateway to get the latest state of the devices, so it is necessary to issue an update in order to have the correct state of the devices.
+
 will provide this type of data, which is a string representation (__repr__) of the object
 
     <MotionBlind mac: abcdefghujkl0001, type: RollerBlind, status: Stopped, position: 0 %, angle: 0, limit: Limits, battery: 1195, RSSI: -82 dBm>
     <MotionBlind mac: abcdefghujkl0001, type: RollerBlind, status: stopped, position: 0 &, angle: 0.0, limit BothLimitsDetected, battery: DC, 103.0 %,12.4 V, charging: False, RSSI: -53 dBm, com: BiDirection>
+    
 Which is a representation of the Blind Object's variables, this is something tha we can use to extract data for fhem the representation.
 
-Although it looks like a dict, it is not directly usable in python and needs to be converted (will try to define it with eval).
+Although it looks like a dict, it is not directly usable in python and needs to be converted (and it's not written to be used by eval to recreate the object).
 
 An object MotionBlind is defined by the following arguments:
 
