@@ -41,7 +41,7 @@ will provide this type of data, which is a string representation (__repr__) of t
     <MotionBlind mac: abcdefghujkl0001, type: RollerBlind, status: stopped, position: 0 &, angle: 0.0, limit BothLimitsDetected, battery: DC, 103.0 %,12.4 V, charging: False, RSSI: -53 dBm, com: BiDirection>
 Which is a representation of the Blind Object's variables, this is something tha we can use to extract data for fhem the representation.
 
-Although it lokks like a dict, it is not directly usable in python and needs to be converted.
+Although it looks like a dict, it is not directly usable in python and needs to be converted (will try to define it with eval).
 
 An object MotionBlind is defined by the following arguments:
 
