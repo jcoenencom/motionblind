@@ -38,7 +38,7 @@ In order to get the devices defined on the gateway (populate the m.device_list d
 will provide this type of data, which is a string representation (__repr__) of the object
 
     <MotionBlind mac: abcdefghujkl0001, type: RollerBlind, status: Stopped, position: 0 %, angle: 0, limit: Limits, battery: 1195, RSSI: -82 dBm>
-    <MotionBlind mac: 10102, type: RollerBlind, status: stopped, position: 0 &, angle: 0.0, limit BothLimitsDetected, battery: DC, 103.0 %,12.4 V, charging: False, RSSI: -53 dBm, com: BiDirection>>
+    <MotionBlind mac: abcdefghujkl0001, type: RollerBlind, status: stopped, position: 0 &, angle: 0.0, limit BothLimitsDetected, battery: DC, 103.0 %,12.4 V, charging: False, RSSI: -53 dBm, com: BiDirection>>
 Which is a representation of the Blind Object's variables, this is something tha we can use to extract data for fhem the representation.
 
 Although it lokks like a dict, it is not directly usable in python and needs to be converted.
