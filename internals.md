@@ -42,3 +42,16 @@ will provide this type of data, which is a string representation (__repr__) of t
 Which is a representation of the Blind Object's variables, this is something tha we can use to extract data for fhem the representation.
 
 Although it lokks like a dict, it is not directly usable in python and needs to be converted.
+
+An object MotionBlind is defined by the following arguments:
+
+        gateway: MotionGateway = None,
+        mac: str = None,
+        device_type: str = None,
+        max_angle: int = 180,
+
+So defining a object using (an unspecified argument will be defaulted to its predefined value, eg max_angle will 180, gateway will be None):
+
+        MBObject = MotionBlind(gateway=mgw, mac=blind_mac, device_type='RollerBlind')
+
+        
