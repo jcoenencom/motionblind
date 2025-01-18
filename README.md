@@ -16,7 +16,7 @@ In order to use python code in fhem the [fhempy](https://github.com/fhempy/fhemp
 
 Update the init.py of the library ...
 
-            nano /opt/fhem/.fhempy/fhempy_venv/lib/python3.11/site-packages/motionblinds/__init__.py
+            sudo nano /opt/fhem/.fhempy/fhempy_venv/lib/python3.11/site-packages/motionblinds/__init__.py
 
 Add the followig line at the end of the imports
 
