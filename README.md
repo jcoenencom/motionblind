@@ -14,6 +14,14 @@ The motors are connected through a [BREL HUB](https://www.brel-home.nl/nl/pro/pr
 
 In order to use python code in fhem the [fhempy](https://github.com/fhempy/fhempy/tree/master) module has to be installed:
 
+Update the init.py of the library ...
+
+            nano /opt/fhem/.fhempy/fhempy_venv/lib/python3.11/site-packages/motionblinds/__init__.py
+
+Add the followig line at the end of the imports
+
+            from .motion_blinds import MotionBlind
+
 # Install fhempy
 
 ### Dependencies:
