@@ -53,7 +53,7 @@ class motionblind(generic.FhemModule):
         await super().Define(hash, args, argsh)
 
         if len(args) < 6:
-            return "Usage: define NAME fhempy motionblinds IP KEY"
+            return "Usage: define NAME fhempy motionblind IP KEY"
 
 
     # define the attributes
@@ -63,7 +63,7 @@ class motionblind(generic.FhemModule):
         await fhem.CommandAttr(self.hash, self.hash["NAME"] + " devStateIcon up:fts_garage_door_down:down down:fts_garage_door_up:up")
 
     # check the defined attributes in the define command
-    # DEFINE name fhempy motionblinds IP KEY MAC DEVICE_TYPE
+    # DEFINE name fhempy motionblind IP KEY MAC DEVICE_TYPE
 
         self.IP = args[3]
         hash['IP']=self.IP
