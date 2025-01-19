@@ -8,6 +8,33 @@ class motionblinds(generic.FhemModule):
 
     devtypes = {"02000001":"Gateway", "02000002":"Gateway","10000000":"Standard Blind", "10000001":"Top/Down Bottom/Up", "10000002":"Double Roller"}
 
+    blindtype = ["RollerBlind",
+        "VenetianBlind",
+        "RomanBlind",
+        "HoneycombBlind",
+        "ShangriLaBlind",
+        "RollerShutter",
+        "RollerGate",
+        "Awning",
+        "TopDownBottomUp",
+        "DayNightBlind",
+        "DimmingBlind" ,
+        "Curtain" ,
+        "CurtainLeft",
+        "CurtainRight" ,
+        "DoubleRoller" ,
+        "VerticalBlindLeft",
+        "WoodShutter" ,
+        "SkylightBlind" ,
+        "DualShade" ,
+        "VerticalBlind" ,
+        "VerticalBlindRight",
+        "WovenWoodShades",
+        "Switch" ,
+        "InsectScreen" ,
+        "TriangleBlind"
+        ]
+
     def __init__(self, logger):
         super().__init__(logger)
         self.key = None
@@ -44,7 +71,7 @@ class motionblinds(generic.FhemModule):
         hash['key']=self.key
         self.mac = args[5]
         hash['mac'] = self.mac
-        self.devtype = self.devtypes[args[6]]
+        self.devtype = args[6]
         hash['Device_Type'] =  self.devtype
 
 # define the gateway
