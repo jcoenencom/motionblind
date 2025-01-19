@@ -1,0 +1,68 @@
+import fhem, generic
+
+class module name(parent class from which we inherit stuff)
+
+so a class test(generic.FhemModule) will inherit the mathods from FhemModule defined in file generic.py
+
+
+connection with logger ???
+    def __init__(self, logger):
+        super().__init__(logger)
+
+
+Define the attributes
+
+define a dict of the attributes and give it to set_attr_config method.
+
+Each dict member is itself a dict with predefined keyx:
+
+"default" is the default value
+
+
+        self._attr_list = {
+            "key": {"default": None},
+            "IP": {"default": None},
+        }
+
+        await self.set_attr_config(self._attr_list)
+
+Variable hash holds the internals
+
+eg. hash["NAME"]  is the device name.
+
+
+set_set_config(set_config) mathod to set the set actions in fhem
+
+Must see the classes and implement a way to convert returned object from classses into fhem structure
+
+
+__repr__ returns the object in a printable form so in astring.
+
+{ dict key : < object > }
+
+where Object is <object type dict of internal values (mac: 123456, type: none, status value units, angle: value, )
+
+
+2025-01-19 12:44:52,934 - ERROR    - fhempy.lib.fhem_pythonbinding: Failed to execute function Set: Traceback (most recent call last):
+  File "/opt/fhem/.fhempy/fhempy_venv/lib/python3.11/site-packages/fhempy/lib/fhem_pythonbinding.py", line 385, in handle_function
+    ret = await self.execute_function(hash, fhem_reply_done, nmInstance)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/fhem/.fhempy/fhempy_venv/lib/python3.11/site-packages/fhempy/lib/fhem_pythonbinding.py", line 484, in execute_function
+    ret = await asyncio.wait_for(
+          ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.11/asyncio/tasks.py", line 479, in wait_for
+    return fut.result()
+           ^^^^^^^^^^^^
+  File "/opt/fhem/.fhempy/fhempy_venv/lib/python3.11/site-packages/fhempy/lib/generic.py", line 208, in Set
+    return await utils.handle_set(self._conf_set, self, hash, args, argsh)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/fhem/.fhempy/fhempy_venv/lib/python3.11/site-packages/fhempy/lib/utils.py", line 340, in handle_set
+    return await fct_call(hash, final_params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/fhem/.fhempy/fhempy_venv/lib/python3.11/site-packages/fhempy/lib/motiongw/motiongw.py", line 135, in set_scan
+    # normally mesg holds the complete configuration of the discovered gateway/hub
+               ^^^^^^^^^
+AttributeError: 'MotionDiscovery' object has no attribute 'keys'
+ with hash: {'PYTHONTYPE': 'motiongw', 'NAME': 'mgw', 'function': 'Set', 'args': ['mgw', 'scan'], 'msgtype': 'function', 'defargsh': {}, 'argsh': {}, 'defargs': ['mgw', 'fhempy', 'motiongw', '172.19.3.22', 'XXXXXXX-XX-4c'], 'FHEMPYTYPE': 'motiongw', 'id': 30444304}
+2025-01-19 12:44:52,935 - ERROR    - fhempy.lib.fhem_pythonbinding: <<< 30444304 10024.98ms: {'PYTHONTYPE': 'motiongw', 'NAME': 'mgw', 'function': 'Set', 'args': ['mgw', 'scan'], 'msgtype': 'function', 'defargsh': {}, 'argsh': {}, 'defargs': ['mgw', 'fhempy', 'motiongw', '172.19.3.22', 'XXXXX-XX-4c'], 'FHEMPYTYPE': 'motiongw', 'id': 30444304, 'finished': 1, 'error': 'Failed to execute function Set: Traceback (most recent call last):\n  File "/opt/fhem/.fhempy/fhempy_venv/lib/python3.11/site-packages/fhempy/lib/fhem_pythonbinding.py", line 385, in handle_function\n    ret = await self.execute_function(hash, fhem_reply_done, nmInstance)\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File "/opt/fhem/.fhempy/fhempy_venv/lib/python3.11/site-packages/fhempy/lib/fhem_pythonbinding.py", line 484, in execute_function\n    ret = await asyncio.wait_for(\n          ^^^^^^^^^^^^^^^^^^^^^^^\n  File "/usr/lib/python3.11/asyncio/tasks.py", line 479, in wait_for\n    return fut.result()\n           ^^^^^^^^^^^^\n  File "/opt/fhem/.fhempy/fhempy_venv/lib/python3.11/site-packages/fhempy/lib/generic.py", line 208, in Set\n    return await utils.handle_set(self._conf_set, self, hash, args, argsh)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File "/opt/fhem/.fhempy/fhempy_venv/lib/python3.11/site-packages/fhempy/lib/utils.py", line 340, in handle_set\n    return await fct_call(hash, final_params)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File "/opt/fhem/.fhempy/fhempy_venv/lib/python3.11/site-packages/fhempy/lib/motiongw/motiongw.py", line 135, in set_scan\n    # normally mesg holds the complete configuration of the discovered gateway/hub\n               ^^^^^^^^^\nAttributeError: \'MotionDiscovery\' object has no attribute \'keys\'\n'}
+2025-01-19 12:44:52,936 - WARNING  - fhempy.lib.fhem_pythonbinding: fhempy took 10026ms for {"PYTHONTYPE":"motiongw","NAME":"mgw","function":"Set","args":["mgw","scan"],"msgtype":"function","defargsh":{},"argsh":{},"defargs":["mgw","fhempy","motiongw","172.19.3.22","XXXXX-XXXX-4c"],"FHEMPYTYPE":"motiongw","id":30444304}
