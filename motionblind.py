@@ -4,7 +4,7 @@ from motionblind import MotionGateway, MotionBlind
 from .. import fhem, generic
 
 
-class motionblind(generic.FhemModule):
+class motionblinds(generic.FhemModule):
 
     devtypes = {"02000001":"Gateway", "02000002":"Gateway","10000000":"Standard Blind", "10000001":"Top/Down Bottom/Up", "10000002":"Double Roller"}
 
@@ -53,7 +53,7 @@ class motionblind(generic.FhemModule):
         await super().Define(hash, args, argsh)
 
         if len(args) < 6:
-            return "Usage: define NAME fhempy motionblind IP KEY"
+            return "Usage: define NAME fhempy motionblinds IP KEY"
 
 
     # define the attributes
@@ -63,7 +63,7 @@ class motionblind(generic.FhemModule):
         await fhem.CommandAttr(self.hash, self.hash["NAME"] + " devStateIcon up:fts_garage_door_down:down down:fts_garage_door_up:up")
 
     # check the defined attributes in the define command
-    # DEFINE name fhempy motionblind IP KEY MAC DEVICE_TYPE
+    # DEFINE name fhempy motionblinds IP KEY MAC DEVICE_TYPE
 
         self.IP = args[3]
         hash['IP']=self.IP
