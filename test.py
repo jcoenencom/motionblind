@@ -1,5 +1,5 @@
 import asyncio
-from motionblind import MotionGateway
+from motionblinds import MotionGateway
 
 from .. import fhem, generic
 
