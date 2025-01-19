@@ -122,7 +122,7 @@ class motionblinds(generic.FhemModule):
         else:
             self.gw.GetDeviceList()
             self.gw.Update()
-            blind = gw.device_list[self.mac]
+            blind = self.gw.device_list[self.mac]
             self.blind.Open()
             await fhem.readingsSingleUpdate(self.hash,"state", "up", 1)
 
@@ -135,7 +135,7 @@ class motionblinds(generic.FhemModule):
         else:
             self.gw.GetDeviceList()
             self.gw.Update()
-            blind = gw.device_list[self.mac]
+            blind = self.gw.device_list[self.mac]
             self.blind.Close()
             await fhem.readingsSingleUpdate(self.hash,"state", "down", 1)
 
