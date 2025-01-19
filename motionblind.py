@@ -4,7 +4,7 @@ from motionblind import MotionGateway, MotionBlind
 from .. import fhem, generic
 
 
-class motionblinds(generic.FhemModule):
+class motionblind(generic.FhemModule):
 
     devtypes = {"02000001":"Gateway", "02000002":"Gateway","10000000":"Standard Blind", "10000001":"Top/Down Bottom/Up", "10000002":"Double Roller"}
 
