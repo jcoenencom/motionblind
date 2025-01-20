@@ -137,7 +137,6 @@ class motionblinds(generic.FhemModule):
         # no params argument here, as set_up doesn't have arguments defined in set_list_conf
         if (self.mode == "sim"):
             await fhem.readingsSingleUpdate(self.hash,"state", "up", 1)
-            return "set sim up done"
         else:
             self.gw.GetDeviceList()
             self.gw.Update()
@@ -150,7 +149,6 @@ class motionblinds(generic.FhemModule):
         # no params argument here, as set_down doesn't have arguments defined in set_list_conf
         if (self.mode == "sim"):
             await fhem.readingsSingleUpdate(self.hash,"state", "down", 1)
-            return "Set sim down done"
         else:
             self.gw.GetDeviceList()
             self.gw.Update()
