@@ -47,6 +47,25 @@ class motionblinds(generic.FhemModule):
         self.mode = None
         return
 
+
+#
+# set the FHEM readings for the blind
+#
+    async def __set_readings(self):
+        # loop through the __dict__ keys and set the value according to the key name
+        for key in list(blind.__dict__.keys()):
+            lacle = key
+        # extract object attributes value if not defined their __dict__ value
+            str = "self.blind" + re.sub('^_','.',lacle)
+            try: 
+                    # the attribute exists
+                    valeur = eval(str)
+                    hash[str] = valeur
+            except AttributeError:
+                    # unknown attribute but a dictionary value is defined
+                    hash[key] = blind.__dict__[key]
+
+
     # FHEM FUNCTION
     async def Define(self, hash, args, argsh):
     
@@ -137,6 +156,8 @@ class motionblinds(generic.FhemModule):
             self.gw.Update()
             blind = self.gw.device_list[self.mac]
             self.blind.Close()
+            self.blind.Update()
+
             await fhem.readingsSingleUpdate(self.hash,"state", "down", 1)
 
     async def set_mode(self, hash, params):
