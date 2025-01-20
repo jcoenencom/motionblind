@@ -143,7 +143,7 @@ class motionblinds(generic.FhemModule):
             blind = self.gw.device_list[self.mac]
             self.blind.Open()
             await fhem.readingsSingleUpdate(self.hash,"state", "up", 1)
-        self.set_readings()
+        self.__set_readings()
             
     async def set_down(self, hash, params):
         # no params argument here, as set_down doesn't have arguments defined in set_list_conf
@@ -157,7 +157,7 @@ class motionblinds(generic.FhemModule):
             self.blind.Update()
 
             await fhem.readingsSingleUpdate(self.hash,"state", "down", 1)
-        self.set_readings()
+        self.__set_readings()
 
     async def set_mode(self, hash, params):
         # user can specify mode as mode=eco or just eco as argument
