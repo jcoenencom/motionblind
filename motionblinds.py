@@ -66,6 +66,7 @@ class motionblinds(generic.FhemModule):
             try: 
                     # the attribute exists
                     valeur = eval(key)
+                    self.logger.debug(f"set self.readings[{key}] into reading {readingsname} = {valeur}")
                     await fhem.readingsBulkUpdate(self.hash, readingsname, valeur, 1)
             except AttributeError:
                 pass
