@@ -58,6 +58,7 @@ class motionblinds(generic.FhemModule):
         await fhem.readingsBeginUpdate(self.hash)
         valeur = None
         readingsname = None
+        blind=self.blind
         for key in self.readings.keys():
             lacle = key
         # extract object attributes value if not defined their __dict__ value
