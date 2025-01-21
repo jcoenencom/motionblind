@@ -118,6 +118,7 @@ class motionblinds(generic.FhemModule):
                 "params": {"mode": {"default": "live", "optional": False}},
                 "options": "live,sim",
             },
+            "status":{},
         }
         await self.set_set_config(set_config)
 
@@ -143,27 +144,26 @@ class motionblinds(generic.FhemModule):
     async def set_up(self, hash, params):
         # no params argument here, as set_up doesn't have arguments defined in set_list_conf
         if (self.mode == "sim"):
-            await fhem.readingsSingleUpdate(self.hash,"state", "up", 1)
+            # sim mode do nothing
+            pass
         else:
-            self.gw.GetDeviceList()
-            self.gw.Update()
-            blind = self.gw.device_list[self.mac]
+            # isseu the open command to the blind followed by an update to get blind readings
             self.blind.Open()
-            await fhem.readingsSingleUpdate(self.hash,"state", "up", 1)
+            self.blind.Update()
+        await fhem.readingsSingleUpdate(self.hash,"state", "up", 1)
         await self.__set_readings()
             
     async def set_down(self, hash, params):
         # no params argument here, as set_down doesn't have arguments defined in set_list_conf
         if (self.mode == "sim"):
-            await fhem.readingsSingleUpdate(self.hash,"state", "down", 1)
+            # sim mode do nothing
+            pass
         else:
-            self.gw.GetDeviceList()
-            self.gw.Update()
-            blind = self.gw.device_list[self.mac]
+            # isseu the close command to the blind followed by an update to get blind readings
             self.blind.Close()
             self.blind.Update()
-
-            await fhem.readingsSingleUpdate(self.hash,"state", "down", 1)
+        # update FHM device readings
+        await fhem.readingsSingleUpdate(self.hash,"state", "down", 1)
         await self.__set_readings()
 
     async def set_mode(self, hash, params):
@@ -172,3 +172,11 @@ class motionblinds(generic.FhemModule):
         self.mode = params["mode"]
         await fhem.readingsSingleUpdate(hash, "mode", self.mode, 1)
  
+    async def set_status(self, hash, params):
+        # get the state of the blind
+        if (self.mode == "sim"):
+            pass
+        else:
+            self.blind.Update()
+        await self.__set_readings()
+        await fhem.readingsSingleUpdate(self.hash,"state", "down", 1)
