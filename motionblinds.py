@@ -67,7 +67,7 @@ class motionblinds(generic.FhemModule):
                     # the attribute exists
                     valeur = eval(key)
                     self.logger.debug(f"set self.readings[{key}] into reading {readingsname} = {valeur}")
-                    await fhem.readingsBulkUpdate(self.hash, readingsname, valeur, 1)
+#                    await fhem.readingsBulkUpdate(self.hash, readingsname, valeur, 1)
             except AttributeError:
                 pass
         await fhem.readingsEndUpdate(hash, 1)
@@ -128,9 +128,9 @@ class motionblinds(generic.FhemModule):
         if len(args) < 5:
             return "Usage: define brel fhempy test"
         
-        await fhem.readingsBeginUpdate(hash)
+        await fhem.readingsBeginUpdate(self.hash)
         await fhem.readingsBulkUpdateIfChanged(self.hash, "state", "up")
-        await fhem.readingsEndUpdate(hash, 1)
+        await fhem.readingsEndUpdate(self.hash, 1)
 
         # Attribute function format: set_attr_NAMEOFATTRIBUTE(self, hash)
         # self._attr_NAMEOFATTRIBUTE contains the new state
