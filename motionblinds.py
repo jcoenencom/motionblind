@@ -1,6 +1,6 @@
 import asyncio
 from motionblinds import MotionGateway, MotionBlind
-
+import re
 from .. import fhem, generic
 
 
@@ -54,7 +54,7 @@ class motionblinds(generic.FhemModule):
     async def __set_readings(self):
         # loop through the __dict__ keys and set the value according to the key name
 #        await fhem.readingsBeginUpdate(self.hash)
-        for key in list(blind.__dict__.keys()):
+        for key in list(self.blind.__dict__.keys()):
             lacle = key
         # extract object attributes value if not defined their __dict__ value
             str = "self.blind" + re.sub('^_','.',lacle)
@@ -64,7 +64,7 @@ class motionblinds(generic.FhemModule):
                     self.hash[str] = valeur
             except AttributeError:
                     # unknown attribute but a dictionary value is defined
-                    self.hash[key] = blind.__dict__[key]
+                    self.hash[key] = self.blind.__dict__[key]
             await fhem.readingsSingleUpdate(self.hash, str, valeur, 1)
 
 
