@@ -7,6 +7,7 @@ from .. import fhem, generic
 class motionblinds(generic.FhemModule):
 
     devtypes = {"02000001":"Gateway", "02000002":"Gateway","10000000":"Standard Blind", "10000001":"Top/Down Bottom/Up", "10000002":"Double Roller"}
+    readings = {"blind.device_type": "type", "blind.status": "status", "blind.position": "position", "blind.angle": "angle", "blind.limit_status":"limits", "blind.battery_voltage": "battery_voltage", "blind.battey_level":"battery_level", "blind.is_charging":"is_charging", "blind.RSSI":"RSSI"}
 
     blindtype = ["RollerBlind",
         "VenetianBlind",
@@ -57,7 +58,7 @@ class motionblinds(generic.FhemModule):
         await fhem.readingsBeginUpdate(self.hash)
         valeur = None
         readingsname = None
-        for key in list(self.blind.__dict__.keys()):
+        for key in self.readings.keys():
             lacle = key
         # extract object attributes value if not defined their __dict__ value
             str = "self.blind" + re.sub('^_','.',lacle)
