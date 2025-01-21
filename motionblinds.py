@@ -70,7 +70,7 @@ class motionblinds(generic.FhemModule):
 #                    await fhem.readingsBulkUpdate(self.hash, readingsname, valeur, 1)
             except AttributeError:
                 pass
-        await fhem.readingsEndUpdate(hash, 1)
+        await fhem.readingsEndUpdate(self.hash, 0)
 
 
     # FHEM FUNCTION
@@ -86,7 +86,7 @@ class motionblinds(generic.FhemModule):
 
 #        await self.set_attr_config(self._attr_list)
         await self.set_icon("fts_garage_door_30")
-        await fhem.CommandAttr(self.hash, self.hash["NAME"] + " devStateIcon up:fts_garage_door_down:down down:fts_garage_door_up:up")
+        await fhem.CommandAttr(hash, hash["NAME"] + " devStateIcon up:fts_garage_door_down:down down:fts_garage_door_up:up")
 
     # check the defined attributes in the define command
     # DEFINE name fhempy motionblinds IP KEY MAC DEVICE_TYPE
