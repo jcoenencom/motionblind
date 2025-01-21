@@ -53,21 +53,25 @@ class motionblinds(generic.FhemModule):
 #
     async def __set_readings(self):
         # loop through the __dict__ keys and set the value according to the key name
-#        await fhem.readingsBeginUpdate(self.hash)
+        # prepare for the update of the readings
+        await fhem.readingsBeginUpdate(self.hash)
         valeur = None
+        readingsname = None
         for key in list(self.blind.__dict__.keys()):
             lacle = key
         # extract object attributes value if not defined their __dict__ value
             str = "self.blind" + re.sub('^_','.',lacle)
+            readingsname = re.sub('^_','',lacle)
             try: 
                     # the attribute exists
                     valeur = eval(str)
                     self.hash[str] = valeur
             except AttributeError:
-                    # unknown attribute but a dictionary value is defined
+                    # unknown attribute but a dictionary value is defined 
+                    readingsname=key
                     valeur = self.blind.__dict__[key]
                     self.hash[key] = valeur
-            await fhem.readingsSingleUpdate(self.hash, str, valeur, 1)
+            await fhem.readingsBulkUpdate(self.hash, readingsname, valeur, 1)
 
 
     # FHEM FUNCTION
