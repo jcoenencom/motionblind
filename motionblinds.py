@@ -65,7 +65,7 @@ class motionblinds(generic.FhemModule):
             except AttributeError:
                     # unknown attribute but a dictionary value is defined
                     self.hash[key] = blind.__dict__[key]
-        await fhem.readingsEndUpdate(self.hash, 1)
+            await fhem.readingsSingleUpdate(self.hash, str, valeur, 1)
 
 
     # FHEM FUNCTION
