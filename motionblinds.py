@@ -153,7 +153,7 @@ class motionblinds(generic.FhemModule):
         # no params argument here, as set_up doesn't have arguments defined in set_list_conf
         if (self.mode == "sim"):
             # sim mode do nothing
-            pass
+            self.blind.position = 0
         else:
             # isseu the open command to the blind followed by an update to get blind readings
 #            self.gw.Update()
@@ -166,7 +166,8 @@ class motionblinds(generic.FhemModule):
     async def set_down(self, hash, params):
         # no params argument here, as set_down doesn't have arguments defined in set_list_conf
         if (self.mode == "sim"):
-            # sim mode do nothing
+            self.blind.RSSI = 87
+            self.blind.position = 100
             pass
         else:
             # isseu the close command to the blind followed by an update to get blind readings
@@ -185,7 +186,7 @@ class motionblinds(generic.FhemModule):
     async def set_status(self, hash, params):
         # get the state of the blind
         if (self.mode == "sim"):
-            pass
+            self.blind.RSSI = 52
         else:
 #            self.gw.Update()
 #            blind = self.gw.device_list[self.mac]
