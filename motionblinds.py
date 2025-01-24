@@ -103,6 +103,17 @@ class motionblinds(generic.FhemModule):
         self.devtype = args[6]
         hash['Device_Type'] =  self.devtype
 
+#initial mode is sim
+        await fhem.readingsSingleUpdate(hash, "mode", "sim", 1)
+        self.mode = "sim"
+        if len(args) < 5:
+            return "Usage: define brel fhempy test"
+        
+        await fhem.readingsBeginUpdate(self.hash)
+        await fhem.readingsBulkUpdateIfChanged(self.hash, "state", "up")
+        await fhem.readingsEndUpdate(self.hash, 1)
+
+
 # define the gateway and get the blind from the gateway
         self.gw = MotionGateway(ip = self.IP, key = self.key)
         if (self.mode == "sim"):
@@ -128,16 +139,6 @@ class motionblinds(generic.FhemModule):
             "status":{},
         }
         await self.set_set_config(set_config)
-
-#initial mode is sim
-        await fhem.readingsSingleUpdate(hash, "mode", "sim", 1)
-        self.mode = "sim"
-        if len(args) < 5:
-            return "Usage: define brel fhempy test"
-        
-        await fhem.readingsBeginUpdate(self.hash)
-        await fhem.readingsBulkUpdateIfChanged(self.hash, "state", "up")
-        await fhem.readingsEndUpdate(self.hash, 1)
 
         # Attribute function format: set_attr_NAMEOFATTRIBUTE(self, hash)
         # self._attr_NAMEOFATTRIBUTE contains the new state
