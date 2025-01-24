@@ -90,7 +90,7 @@ class motionblinds(generic.FhemModule):
 #        await self.set_attr_config(self._attr_list)
         await self.set_icon("fts_garage_door_30")
         await fhem.CommandAttr(hash, hash["NAME"] + " devStateIcon up:fts_garage_door_down:down down:fts_garage_door_up:up")
-
+        
     # check the defined attributes in the define command
     # DEFINE name fhempy motionblinds IP KEY MAC DEVICE_TYPE
 
@@ -104,12 +104,14 @@ class motionblinds(generic.FhemModule):
         hash['Device_Type'] =  self.devtype
 
 #initial mode is sim
-        await fhem.readingsSingleUpdate(hash, "mode", "sim", 1)
+
         self.mode = "sim"
         if len(args) < 5:
             return "Usage: define brel fhempy test"
         
         await fhem.readingsBeginUpdate(self.hash)
+        await fhem.readingsBulkUpdateIfChanged(self.hash, "mode", "sim")
+        await fhem.readingsBulkUpdateIfChanged(self.hash, "verbose", "5")
         await fhem.readingsBulkUpdateIfChanged(self.hash, "state", "up")
         await fhem.readingsEndUpdate(self.hash, 1)
 
