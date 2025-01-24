@@ -46,6 +46,7 @@ class motionblinds(generic.FhemModule):
         self.devType = None
         self.max_angle = 0
         self.mode = None
+        self.position = 0
         return
 
 
@@ -138,6 +139,9 @@ class motionblinds(generic.FhemModule):
                 "options": "live,sim",
             },
             "status":{},
+            "position": {
+                "args": ["position"], "params": {"position": {"default": 0, "options": "slider,0,1,100", "optional": False}},
+            }
         }
         await self.set_set_config(set_config)
 
@@ -192,3 +196,8 @@ class motionblinds(generic.FhemModule):
             self.blind.Update()
         await self.__set_readings()
         await fhem.readingsSingleUpdate(self.hash,"state", "down", 1)
+
+    async def set_position(self, hash, params):
+        hash['position']=params['position']
+        self.position = params['position']
+    
