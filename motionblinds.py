@@ -166,7 +166,6 @@ class motionblinds(generic.FhemModule):
     async def set_down(self, hash, params):
         # no params argument here, as set_down doesn't have arguments defined in set_list_conf
         if (self.mode == "sim"):
-            self.blind.RSSI = 87
             self.blind.position = 100
             pass
         else:
@@ -186,7 +185,7 @@ class motionblinds(generic.FhemModule):
     async def set_status(self, hash, params):
         # get the state of the blind
         if (self.mode == "sim"):
-            self.blind.RSSI = 52
+            pass
         else:
 #            self.gw.Update()
 #            blind = self.gw.device_list[self.mac]
