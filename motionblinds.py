@@ -60,7 +60,8 @@ class motionblinds(generic.FhemModule):
         await fhem.readingsBeginUpdate(self.hash)
         valeur = None
         readingsname = None
-        blind=self.blind
+        self.gw.Update()
+        blind = self.gw.device_list[self.mac]
         for key in self.readings.keys():
             lacle = key
         # extract object attributes value if not defined their __dict__ value
@@ -161,10 +162,10 @@ class motionblinds(generic.FhemModule):
             pass
         else:
             # isseu the open command to the blind followed by an update to get blind readings
-#            self.gw.Update()
-#            blind = self.gw.device_list[self.mac]
-            self.blind.Open()
-            self.blind.Update()
+            self.gw.Update()
+            blind = self.gw.device_list[self.mac]
+            blind.Open()
+            blind.Update()
         await fhem.readingsSingleUpdate(self.hash,"state", "up", 1)
         await self.__set_readings()
             
@@ -174,8 +175,10 @@ class motionblinds(generic.FhemModule):
             pass
         else:
             # isseu the close command to the blind followed by an update to get blind readings
-            self.blind.Close()
-            self.blind.Update()
+            self.gw.Update()
+            blind = self.gw.device_list[self.mac]
+            blind.Close()
+            blind.Update()
         # update FHM device readings
         await fhem.readingsSingleUpdate(self.hash,"state", "down", 1)
         await self.__set_readings()
@@ -191,9 +194,9 @@ class motionblinds(generic.FhemModule):
         if (self.mode == "sim"):
             pass
         else:
-#            self.gw.Update()
-#            blind = self.gw.device_list[self.mac]
-            self.blind.Update()
+            self.gw.Update()
+            blind = self.gw.device_list[self.mac]
+            blind.Update()
         await self.__set_readings()
         await fhem.readingsSingleUpdate(self.hash,"state", "down", 1)
 
