@@ -140,7 +140,7 @@ class motionblinds(generic.FhemModule):
             },
             "status":{},
             "position": {
-                "args": ["position"], "params": {"position": {"default": 0, "options": "slider,0,1,100", "optional": False}},
+                "args": ["position"],  "options": "slider,0,1,100",
             }
         }
         await self.set_set_config(set_config)
