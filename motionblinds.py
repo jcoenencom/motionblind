@@ -111,7 +111,7 @@ class motionblinds(generic.FhemModule):
         
         await fhem.readingsBeginUpdate(self.hash)
         await fhem.readingsBulkUpdateIfChanged(self.hash, "mode", "sim")
-        await fhem.readingsBulkUpdateIfChanged(self.hash, "verbose", "5")
+        await fhem.readingsBulkUpdateIfChanged(self.hash, "verbose", 5)
         await fhem.readingsBulkUpdateIfChanged(self.hash, "state", "up")
         await fhem.readingsEndUpdate(self.hash, 1)
 
