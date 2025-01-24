@@ -53,7 +53,8 @@ class motionblinds(generic.FhemModule):
 # set the FHEM readings for the blind
 #
     async def __set_readings(self):
-        # loop through the __dict__ keys and set the value according to the key name
+        # loop through the __dict__ keys and set the value according to the key name for exampe "blind.device_type": "type" will provide a key blind.device_type and a reading's name type
+        # reading(type) is set to eval(blind.device_type)
         # prepare for the update of the readings
         await fhem.readingsBeginUpdate(self.hash)
         valeur = None
@@ -65,8 +66,10 @@ class motionblinds(generic.FhemModule):
             readingsname = self.readings[key]
             try: 
                     # the attribute exists
+                    # evaluate its value from the blind dict
                     valeur = eval(key)
                     self.logger.debug(f"set self.readings[{key}] into reading {readingsname} = {valeur}")
+                    # set the reading in fhem's device
                     await fhem.readingsBulkUpdate(self.hash, readingsname, valeur, 1)
             except AttributeError:
                 pass
@@ -100,9 +103,13 @@ class motionblinds(generic.FhemModule):
         self.devtype = args[6]
         hash['Device_Type'] =  self.devtype
 
-# define the gateway
+# define the gateway and get the blind from the gateway
         self.gw = MotionGateway(ip = self.IP, key = self.key)
-        self.blind = MotionBlind(gateway=self.gw, mac=self.mac, device_type=self.devtype)
+        if (self.mode == "sim"):
+            self.blind = MotionBlind(gateway=self.gw, mac=self.mac, device_type=self.devtype)
+        else:
+            self.gw.Update()
+            self.blind = self.gw.device_list[self.mac]
 # get  the device list
 #        self.gw.GetDeviceList()
 #        self.gw.update()
@@ -148,6 +155,8 @@ class motionblinds(generic.FhemModule):
             pass
         else:
             # isseu the open command to the blind followed by an update to get blind readings
+#            self.gw.Update()
+#            blind = self.gw.device_list[self.mac]
             self.blind.Open()
             self.blind.Update()
         await fhem.readingsSingleUpdate(self.hash,"state", "up", 1)
@@ -177,6 +186,8 @@ class motionblinds(generic.FhemModule):
         if (self.mode == "sim"):
             pass
         else:
+#            self.gw.Update()
+#            blind = self.gw.device_list[self.mac]
             self.blind.Update()
         await self.__set_readings()
         await fhem.readingsSingleUpdate(self.hash,"state", "down", 1)
