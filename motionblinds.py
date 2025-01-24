@@ -153,7 +153,7 @@ class motionblinds(generic.FhemModule):
         # no params argument here, as set_up doesn't have arguments defined in set_list_conf
         if (self.mode == "sim"):
             # sim mode do nothing
-            self.blind.position = 0
+            pass
         else:
             # isseu the open command to the blind followed by an update to get blind readings
 #            self.gw.Update()
@@ -166,7 +166,6 @@ class motionblinds(generic.FhemModule):
     async def set_down(self, hash, params):
         # no params argument here, as set_down doesn't have arguments defined in set_list_conf
         if (self.mode == "sim"):
-            self.blind.position = 100
             pass
         else:
             # isseu the close command to the blind followed by an update to get blind readings
