@@ -105,14 +105,14 @@ class motionblinds(generic.FhemModule):
         self.devtype = args[6]
         hash['Device_Type'] =  self.devtype
 
-#initial mode is sim
+#initial mode is live
 
-        self.mode = "sim"
+        self.mode = "live"
         if len(args) < 5:
             return "Usage: define brel fhempy test"
         
         await fhem.readingsBeginUpdate(self.hash)
-        await fhem.readingsBulkUpdateIfChanged(self.hash, "mode", "sim")
+        await fhem.readingsBulkUpdateIfChanged(self.hash, "mode", "live")
         await fhem.readingsBulkUpdateIfChanged(self.hash, "state", "up")
         await fhem.readingsEndUpdate(self.hash, 1)
 
