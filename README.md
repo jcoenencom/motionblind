@@ -6,7 +6,7 @@ README.md
 
 By the way this is my first attempt to define a python module for FHEM
 
-A firne dof mine has BREL motors that are controlable by Homeassistant and would like his fhem instance to pilot them as well. 
+A friend of mine has BREL motors that are controlable by Homeassistant and would like his fhem instance to pilot them as well. 
 
 The motors are connected through a [BREL HUB](https://www.brel-home.nl/nl/pro/producten/smart-home/353/hub-03) (ethernet/RF) and a library alread exist in python (the one used by homeassistant)
 
