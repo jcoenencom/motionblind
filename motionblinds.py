@@ -75,7 +75,7 @@ class motionblinds(generic.FhemModule):
                     await fhem.readingsBulkUpdate(self.hash, readingsname, valeur, 1)
             except AttributeError:
                 pass
-        await fhem.readingsEndUpdate(self.hash, 0)
+        await fhem.readingsEndUpdate(self.hash, 1)
 
 
     # FHEM FUNCTION
@@ -140,6 +140,7 @@ class motionblinds(generic.FhemModule):
                 "options": "live,sim",
             },
             "status":{},
+            "Stop": {},
             "position": {
                 "args": ["position"],  "options": "slider,0,1,100",
             }
@@ -165,7 +166,7 @@ class motionblinds(generic.FhemModule):
             self.gw.Update()
             blind = self.gw.device_list[self.mac]
             blind.Open()
-            blind.Update()
+            self.blind.Update()
         await fhem.readingsSingleUpdate(self.hash,"state", "up", 1)
         await self.__set_readings()
             
@@ -199,6 +200,16 @@ class motionblinds(generic.FhemModule):
             blind.Update()
         await self.__set_readings()
         await fhem.readingsSingleUpdate(self.hash,"state", "down", 1)
+
+    async def set_Stop(self,hash,params):
+        if (self.mode == "sim"):
+            pass
+        else:
+            self.gw.Update()
+            blind = self.gw.device_list[self.mac]
+            blind.Stop()
+        await self.set_status()
+        await fhem.readingsSingleUpdate(self.hash,"state", "Stop", 1)
 
     async def set_position(self, hash, params):
         hash['position']=params['position']
