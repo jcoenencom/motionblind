@@ -65,7 +65,7 @@ class motionblinds(generic.FhemModule):
         blind = self.gw.device_list[self.mac]
         self.logger.debug(f"__set_readings {blind['mac']}")
         self.logger.debug(f"__set_readings calling blind.Update()")
-        blind.Update()
+#        blind.Update()
         for key in self.readings.keys():
             lacle = key
         # extract object attributes value if not defined their __dict__ value
