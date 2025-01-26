@@ -61,7 +61,11 @@ class motionblinds(generic.FhemModule):
         valeur = None
         readingsname = None
         self.gw.Update()
+        self.logger.debug(f"__set_readings {self.blind['mac']}")
         blind = self.gw.device_list[self.mac]
+        self.logger.debug(f"__set_readings {blind['mac']}")
+        self.logger.debug(f"__set_readings calling blind.Update()")
+        blind.Update()
         for key in self.readings.keys():
             lacle = key
         # extract object attributes value if not defined their __dict__ value
@@ -128,7 +132,7 @@ class motionblinds(generic.FhemModule):
 #        self.gw.GetDeviceList()
 #        self.gw.update()
 #        for blind in self.gw.device_list.values():
-#            self.logger.info(f"Device found"+blind)
+#            self.logger.info(f"Device {self.mac} found in gateway")
 
         set_config = {
             "up": {},
@@ -146,7 +150,8 @@ class motionblinds(generic.FhemModule):
             }
         }
         await self.set_set_config(set_config)
-
+        self.logger.info(f"Call __set_readings for device Device {self.mac} being created")
+        await self.__set_readings()
         # Attribute function format: set_attr_NAMEOFATTRIBUTE(self, hash)
         # self._attr_NAMEOFATTRIBUTE contains the new state
         async def set_attr_IP(self, hash):
