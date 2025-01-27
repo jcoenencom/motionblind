@@ -8,7 +8,7 @@ from .. import fhem, generic
 class motionblinds(generic.FhemModule):
 
     devtypes = {"02000001":"Gateway", "02000002":"Gateway","10000000":"Standard Blind", "10000001":"Top/Down Bottom/Up", "10000002":"Double Roller"}
-    readings = {"blind.device_type": "type", "blind.status": "status", "blind.position": "position", "blind.angle": "angle", "blind.limit_status":"limits", "blind.battery_voltage": "battery_voltage", "blind.battey_level":"battery_level", "blind.is_charging":"is_charging", "blind.RSSI":"RSSI"}
+    readings = {"blind.blind_type": "type", "blind.status": "status", "blind.position": "position", "blind.angle": "angle", "blind.limit_status":"limits", "blind.battery_voltage": "battery_voltage", "blind.battey_level":"battery_level", "blind.is_charging":"is_charging", "blind.RSSI":"RSSI"}
 
     blindtype = ["RollerBlind",
         "VenetianBlind",
@@ -61,7 +61,7 @@ class motionblinds(generic.FhemModule):
         # at the moment the callback is sequential and cannot call the fhem async method to update the readings
         # so a flag is set that is read by the status_loop routine started at the device creation
 
-        self.logger.debug(f"Rcvd Multicast message from blind {self.blind}")
+        self.logger.info(f"Rcvd Multicast message from blind {self.blind}")
  #       blind = self.blind
  #       for key in self.readings.keys():
  #           lacle = key
@@ -180,8 +180,11 @@ class motionblinds(generic.FhemModule):
             "status":{},
             "Stop": {},
             "position": {
-                "args": ["position"],  "options": "slider,0,1,100",
-            }
+                "args": ["position"],
+                "params": {"position": {"format": "int"}},
+                "options": "slider,0,1,100,0",
+            },
+            
         }
         await self.set_set_config(set_config)
         self.logger.info(f"Call __set_readings for device Device {self.mac} being created")
@@ -258,8 +261,21 @@ class motionblinds(generic.FhemModule):
         await fhem.readingsSingleUpdate(self.hash,"state", direction, 1)
 
     async def set_position(self, hash, params):
-        hash['position']=params['position']
-        self.position = params['position']
+        position = params["position"]
+        self.logger.debug(f"SET POSITION AT {position}")
+        self.gw.Update()
+        
+        for key in params.keys():
+            self.logger.debug(f"params[{key}]")
+        
+#        await fhem.readingsSingleUpdate(self.hash, "location", params['valeur'], 1)
+
+        blind = self.gw.device_list[self.mac]
+
+        blind.Set_position(position)
+
+        self.logger.debug(f"POSITION should be set")
+
 
 # regular update of the status
 
