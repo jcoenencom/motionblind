@@ -49,6 +49,8 @@ class motionblinds(generic.FhemModule):
         self.mode = None
         self.position = 0
         self.changed = 0
+        self._attr_looptimer = 30
+        self._attr_UDPRxCheck = 1
         return
 
 
@@ -88,7 +90,8 @@ class motionblinds(generic.FhemModule):
         valeur = None
         readingsname = None
         self.gw.Update()
-        blind = self.gw.device_list[self.mac]
+        blind = self.blind
+        blind.Update()
         self.logger.debug(f"__set_readings {blind.mac}")
 #        self.logger.debug(f"__set_readings calling blind.Update()")
 #        blind.Update()
@@ -105,6 +108,8 @@ class motionblinds(generic.FhemModule):
                     await fhem.readingsBulkUpdate(self.hash, readingsname, valeur, 1)
             except AttributeError:
                 pass
+            self.logger.debug(f"storing battery_level = {blind.battery_level}")
+            await fhem.readingsBulkUpdate(self.hash, "battery_level", blind.battery_level, 1)
         await fhem.readingsEndUpdate(self.hash, 1)
 
 
@@ -170,15 +175,14 @@ class motionblinds(generic.FhemModule):
                 "help": "Change gateway poll interval defaut is 30 x UDPRxCheck seconds",
             }, 
             "UDPRxCheck": {
-                "default": 3,
+                "default": 1,
                 "format": "int",
                 "help": "Change UDP message receive caheck interval defaut is 1 second.",
                 },
             }
 
         await self.set_attr_config(attr_config)
-        self._attr_looptimer = 30
-        self._attr_UDPRxCheck = 1
+ 
 
         set_config = {
             "up": {},
@@ -218,10 +222,7 @@ class motionblinds(generic.FhemModule):
             pass
         else:
             # isseu the open command to the blind followed by an update to get blind readings
-            self.gw.Update()
-            blind = self.gw.device_list[self.mac]
-            blind.Open()
-            self.blind.Update()
+            self.blind.Open()
         await fhem.readingsSingleUpdate(self.hash,"state", "up", 1)
         await self.__set_readings()
             
@@ -231,10 +232,8 @@ class motionblinds(generic.FhemModule):
             pass
         else:
             # isseu the close command to the blind followed by an update to get blind readings
-            self.gw.Update()
-            blind = self.gw.device_list[self.mac]
-            blind.Close()
-            blind.Update()
+            self.blind.Close()
+
         # update FHM device readings
         await fhem.readingsSingleUpdate(self.hash,"state", "down", 1)
         await self.__set_readings()
@@ -247,14 +246,8 @@ class motionblinds(generic.FhemModule):
  
     async def set_status(self, hash, params):
         # get the state of the blind
-        if (self.mode == "sim"):
-            pass
-        else:
-            self.gw.Update()
-            blind = self.gw.device_list[self.mac]
-            blind.Update()
+
         await self.__set_readings()
-        await fhem.readingsSingleUpdate(self.hash,"state", "down", 1)
 
     async def set_Stop(self,hash,params):
         direction = "Stop_" + self.blind.status
