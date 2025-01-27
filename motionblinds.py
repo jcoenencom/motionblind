@@ -162,11 +162,23 @@ class motionblinds(generic.FhemModule):
 
             self.blind = self.gw.device_list[self.mac]
             self.blind.Register_callback("1", self.callback_func_blind)
-# get  the device list
-#        self.gw.GetDeviceList()
-#        self.gw.update()
-#        for blind in self.gw.device_list.values():
-#            self.logger.info(f"Device {self.mac} found in gateway")
+
+        attr_config = {
+            "looptimer": {
+                "default": 30,
+                "format": "int",
+                "help": "Change gateway poll interval defaut is 30 x UDPRxCheck seconds",
+            }, 
+            "UDPRxCheck": {
+                "default": 3,
+                "format": "int",
+                "help": "Change UDP message receive caheck interval defaut is 1 second.",
+                },
+            }
+
+        await self.set_attr_config(attr_config)
+        self._attr_looptimer = 30
+        self._attr_UDPRxCheck = 1
 
         set_config = {
             "up": {},
@@ -270,9 +282,9 @@ class motionblinds(generic.FhemModule):
         
 #        await fhem.readingsSingleUpdate(self.hash, "location", params['valeur'], 1)
 
-        blind = self.gw.device_list[self.mac]
+#        blind = self.gw.device_list[self.mac]
 
-        blind.Set_position(position)
+        self.blind.Set_position(position)
 
         self.logger.debug(f"POSITION should be set")
 
@@ -280,10 +292,10 @@ class motionblinds(generic.FhemModule):
 # regular update of the status
 
     async def update_loop(self):
-        timer = 30
+
         looptimer = 0
         while True:
-            if (self.changed !=0) or (looptimer > timer) :
+            if (self.changed !=0) or (looptimer > self._attr_looptimer) :
                 if (self.mode == "sim"):
                     self.changed = 0
                     looptimer = 0
@@ -308,4 +320,4 @@ class motionblinds(generic.FhemModule):
                             pass
                     await fhem.readingsEndUpdate(self.hash, 1)
             looptimer += 1
-            await asyncio.sleep(1)
+            await asyncio.sleep(self._attr_UDPRxCheck)
