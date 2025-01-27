@@ -123,7 +123,7 @@ class motionblinds(generic.FhemModule):
 #        await self.set_attr_config(self._attr_list)
         await self.set_icon("fts_garage_door_30")
         await fhem.CommandAttr(hash, hash["NAME"] + " devStateIcon up:fts_garage_door_down:down down:fts_garage_door_up:up Stop_Opening:fts_shutter_down:down Stop_Closing:fts_shutter_up:up")
-        await fhem.CommandAttr(hash, hash["NAME"] + " verbose 5")
+        await fhem.CommandAttr(hash, hash["NAME"] + " verbose 0")
     # check the defined attributes in the define command
     # DEFINE name fhempy motionblinds IP KEY MAC DEVICE_TYPE
 
