@@ -64,23 +64,8 @@ class motionblinds(generic.FhemModule):
         # so a flag is set that is read by the status_loop routine started at the device creation
 
         self.logger.info(f"Rcvd Multicast message from blind {self.blind}")
- #       blind = self.blind
- #       for key in self.readings.keys():
- #           lacle = key
-        # extract object attributes value if not defined their __dict__ value
- #           readingsname = self.readings[key]
- #           try: 
-                    # the attribute exists
-                    # evaluate its value from the blind dict
- #                   valeur = eval(key)
-#                    self.logger.debug(f"Callback set self.readings[{key}] into reading {readingsname} = {valeur}")
-#                    self.hash[readingsname]=valeur
+        # set the flag indicating an UDP message has been received
         self.changed = 1
-                    # set the reading in fhem's device
-#                    fhem.readingsSingleUpdate(self.hash,readingsname, valeur, 1)
-#            except AttributeError:
-#                pass
-#        self.logger.debug(f"Call_back hash check {self.hash['NAME']} {self.hash['IP']}")
 
     async def __set_readings(self):
         # loop through the __dict__ keys and set the value according to the key name for exampe "blind.device_type": "type" will provide a key blind.device_type and a reading's name type
@@ -91,8 +76,8 @@ class motionblinds(generic.FhemModule):
         readingsname = None
         self.gw.Update()
         blind = self.blind
-        blind.Update()
-        self.logger.debug(f"__set_readings {blind.mac}")
+#        blind.Update()
+        self.logger.debug(f"__set_readings {blind}")
 #        self.logger.debug(f"__set_readings calling blind.Update()")
 #        blind.Update()
         for key in self.readings.keys():
@@ -103,12 +88,12 @@ class motionblinds(generic.FhemModule):
                     # the attribute exists
                     # evaluate its value from the blind dict
                     valeur = eval(key)
-                    self.logger.debug(f"set self.readings[{key}] into reading {readingsname} = {valeur}")
+#                    self.logger.debug(f"set self.readings[{key}] into reading {readingsname} = {valeur}")
                     # set the reading in fhem's device
                     await fhem.readingsBulkUpdate(self.hash, readingsname, valeur, 1)
             except AttributeError:
                 pass
-        self.logger.debug(f"storing battery_level = {blind.battery_level}")
+#        self.logger.debug(f"storing battery_level = {blind.battery_level}")
         await fhem.readingsBulkUpdate(self.hash, "battery_level", blind.battery_level, 1)
         await fhem.readingsEndUpdate(self.hash, 1)
 
@@ -228,6 +213,8 @@ class motionblinds(generic.FhemModule):
             # isseu the open command to the blind followed by an update to get blind readings
             self.blind.Open()
         await fhem.readingsSingleUpdate(self.hash,"state", "up", 1)
+        self.logger.debug("set_up:")
+        self.blind.Update()
         await self.__set_readings()
             
     async def set_down(self, hash, params):
@@ -236,9 +223,12 @@ class motionblinds(generic.FhemModule):
             pass
         else:
             # isseu the close command to the blind followed by an update to get blind readings
+            self.blind.Update()
+            self.logger.debug("set_down:")
             self.blind.Close()
 
         # update FHM device readings
+        self.blind.Update()
         await fhem.readingsSingleUpdate(self.hash,"state", "down", 1)
         await self.__set_readings()
 
@@ -250,20 +240,20 @@ class motionblinds(generic.FhemModule):
  
     async def set_status(self, hash, params):
         # get the state of the blind
-
+        self.blind.Update()
         await self.__set_readings()
 
     async def set_Stop(self,hash,params):
-        direction = "Stop_" + self.blind.status
+        if self.blind.status != 'Stopped':
+            direction = "Stop_" + self.blind.status
 
-        self.logger.info(f"Called set_Stop with blind.status = {direction}")
+        self.logger.info(f"set_Stop: with blind.status = {direction}")
         await fhem.readingsSingleUpdate(self.hash,"direction", direction, 1)
         if (self.mode == "sim"):
             pass
         else:
-            self.gw.Update()
-            blind = self.gw.device_list[self.mac]
-            blind.Stop()
+            self.blind.Update()
+            self.blind.Stop()
 
 # get the status os the blind
         await self.set_status(hash,params)
@@ -271,8 +261,8 @@ class motionblinds(generic.FhemModule):
 
     async def set_position(self, hash, params):
         position = params["position"]
-        self.logger.debug(f"SET POSITION AT {position}")
-        self.gw.Update()
+        self.logger.debug(f"set_position: SET POSITION AT {position}")
+        self.blind.Update()
         
         for key in params.keys():
             self.logger.debug(f"params[{key}]")
@@ -283,7 +273,7 @@ class motionblinds(generic.FhemModule):
 
         self.blind.Set_position(position)
 
-        self.logger.debug(f"POSITION should be set")
+        self.logger.debug(f"set_position: POSITION being set")
 
     async def set_jog_up(self, hash, params):
                 # no params argument here, as set_jog_up doesn't have arguments defined in set_list_conf
@@ -309,7 +299,8 @@ class motionblinds(generic.FhemModule):
 
         looptimer = 0
         while True:
-            if (self.changed !=0) or (looptimer > self._attr_looptimer) :
+            if (self.changed !=0): 
+                self.logger.info(f"update_loop: UDP message processing: {self.blind}")
                 if (self.mode == "sim"):
                     self.changed = 0
                     looptimer = 0
@@ -318,5 +309,16 @@ class motionblinds(generic.FhemModule):
                     self.changed = 0
                     looptimer = 0
                     await self.__set_readings()
+            elif (looptimer >= self._attr_looptimer):        
+                self.logger.debug(f"update_loop: looptimer reached {self._attr_looptimer} count")
+                if (self.mode == "sim"):
+                    looptimer = 0
+                    pass
+                else:
+                    looptimer = 0
+                    self.blind.Update()        
+                    await self.__set_readings()
+            # either from UDP  message or Update, need to insert the readings
+            
             looptimer += 1
             await asyncio.sleep(self._attr_UDPRxCheck)
