@@ -115,9 +115,8 @@ class motionblinds(generic.FhemModule):
         await fhem.CommandAttr(hash, hash["NAME"] + " devStateIcon up:fts_garage_door_down:down down:fts_garage_door_up:up Stop_Opening:fts_shutter_down:down Stop_Closing:fts_shutter_up:up")
         await fhem.CommandAttr(hash, hash["NAME"] + " webCmd Stop:position:jog_up:jog_down")
         await fhem.CommandAttr(hash, hash['NAME'] + " cmdIcon Stop:rc_GREEN jog_up:edit_collapse jog_down:edit_expand")
-        await fhem.CommandAttr(hash, hash["NAME"] + " verbose 0")
-        await fhem.CommandAttr(hash, hash["NAME"] + f" UDPRxCheck {self._attr_UDPRxCheck}")
-        await fhem.CommandAttr(hash, hash["NAME"] + f" looptimer {self._attr_looptimer}")
+        await fhem.CommandAttr(hash, hash["NAME"] + " verbose 5")
+
     # check the defined attributes in the define command
     # DEFINE name fhempy motionblinds IP KEY MAC DEVICE_TYPE
 
@@ -171,7 +170,8 @@ class motionblinds(generic.FhemModule):
             }
 
         await self.set_attr_config(attr_config)
- 
+        await fhem.CommandAttr(hash, hash["NAME"] + f" UDPRxCheck {self._attr_UDPRxCheck}")
+        await fhem.CommandAttr(hash, hash["NAME"] + f" looptimer {self._attr_looptimer}")
 
         set_config = {
             "up": {},
@@ -216,23 +216,21 @@ class motionblinds(generic.FhemModule):
             self.blind.Open()
         await fhem.readingsSingleUpdate(self.hash,"state", "up", 1)
         self.logger.debug("set_up:")
-        self.blind.Update()
-        await self.__set_readings()
+
             
     async def set_down(self, hash, params):
         # no params argument here, as set_down doesn't have arguments defined in set_list_conf
         if (self.mode == "sim"):
             pass
         else:
-            # isseu the close command to the blind followed by an update to get blind readings
-            self.blind.Update()
+            # issue the close command to the blind followed by an update to get blind readings
             self.logger.debug("set_down:")
             self.blind.Close()
 
         # update FHM device readings
-        self.blind.Update()
+#        self.blind.Update()
         await fhem.readingsSingleUpdate(self.hash,"state", "down", 1)
-        await self.__set_readings()
+#        await self.__set_readings()
 
     async def set_mode(self, hash, params):
         # user can specify mode as mode=eco or just eco as argument
