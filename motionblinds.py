@@ -116,6 +116,8 @@ class motionblinds(generic.FhemModule):
         await fhem.CommandAttr(hash, hash["NAME"] + " webCmd Stop:position:jog_up:jog_down")
         await fhem.CommandAttr(hash, hash['NAME'] + " cmdIcon Stop:rc_GREEN jog_up:edit_collapse jog_down:edit_expand")
         await fhem.CommandAttr(hash, hash["NAME"] + " verbose 0")
+        await fhem.CommandAttr(hash, hash["NAME"] + f" UDPRxCheck {self._attr_UDPRxCheck}")
+        await fhem.CommandAttr(hash, hash["NAME"] + f" looptimer {self._attr_looptimer}")
     # check the defined attributes in the define command
     # DEFINE name fhempy motionblinds IP KEY MAC DEVICE_TYPE
 
@@ -244,11 +246,10 @@ class motionblinds(generic.FhemModule):
         await self.__set_readings()
 
     async def set_Stop(self,hash,params):
-        if self.blind.status != 'Stopped':
+        if (self.blind.status == 'Closing') or (self.blind.status == 'Opening'):
             direction = "Stop_" + self.blind.status
-
-        self.logger.info(f"set_Stop: with blind.status = {direction}")
-        await fhem.readingsSingleUpdate(self.hash,"direction", direction, 1)
+            self.logger.info(f"set_Stop: with blind.status = {direction}")
+            await fhem.readingsSingleUpdate(self.hash,"direction", direction, 1)
         if (self.mode == "sim"):
             pass
         else:
@@ -257,7 +258,6 @@ class motionblinds(generic.FhemModule):
 
 # get the status os the blind
         await self.set_status(hash,params)
-        await fhem.readingsSingleUpdate(self.hash,"state", direction, 1)
 
     async def set_position(self, hash, params):
         position = params["position"]
