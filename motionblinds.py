@@ -108,8 +108,8 @@ class motionblinds(generic.FhemModule):
                     await fhem.readingsBulkUpdate(self.hash, readingsname, valeur, 1)
             except AttributeError:
                 pass
-            self.logger.debug(f"storing battery_level = {blind.battery_level}")
-            await fhem.readingsBulkUpdate(self.hash, "battery_level", blind.battery_level, 1)
+        self.logger.debug(f"storing battery_level = {blind.battery_level}")
+        await fhem.readingsBulkUpdate(self.hash, "battery_level", blind.battery_level, 1)
         await fhem.readingsEndUpdate(self.hash, 1)
 
 
@@ -128,6 +128,8 @@ class motionblinds(generic.FhemModule):
 #        await self.set_attr_config(self._attr_list)
         await self.set_icon("fts_garage_door_30")
         await fhem.CommandAttr(hash, hash["NAME"] + " devStateIcon up:fts_garage_door_down:down down:fts_garage_door_up:up Stop_Opening:fts_shutter_down:down Stop_Closing:fts_shutter_up:up")
+        await fhem.CommandAttr(hash, hash["NAME"] + " webCmd Stop:positio jog_up jog_down")
+        await fhem.CommandAttr(hash, hash['NAME'] + " cmdIcon jog_up:edit_collapse jog_down:edit_expand")
         await fhem.CommandAttr(hash, hash["NAME"] + " verbose 0")
     # check the defined attributes in the define command
     # DEFINE name fhempy motionblinds IP KEY MAC DEVICE_TYPE
@@ -187,6 +189,8 @@ class motionblinds(generic.FhemModule):
         set_config = {
             "up": {},
             "down": {},
+            "jog_up":{},
+            "jog_down": {},
             "mode": {
                 "args": ["mode"],
                 "argsh": ["mode"],
@@ -207,10 +211,10 @@ class motionblinds(generic.FhemModule):
 #        await self.__set_readings()
         # Attribute function format: set_attr_NAMEOFATTRIBUTE(self, hash)
         # self._attr_NAMEOFATTRIBUTE contains the new state
-        async def set_attr_IP(self, hash):
+        #async def set_attr_IP(self, hash):
             # attribute was set to self._attr_IP
             # you can use self._attr_interval already with the new variable
-            pass
+        #    pass
 
         # start update loop
         self._updateloop = self.create_async_task(self.update_loop())
@@ -281,6 +285,23 @@ class motionblinds(generic.FhemModule):
 
         self.logger.debug(f"POSITION should be set")
 
+    async def set_jog_up(self, hash, params):
+                # no params argument here, as set_jog_up doesn't have arguments defined in set_list_conf
+        if (self.mode == "sim"):
+            pass
+        else:
+            # isseu the close command to the blind followed by an update to get blind readings
+            self.blind.Jog_up()
+
+    async def set_jog_down(self, hash, params):
+                # no params argument here, as set_jog_up doesn't have arguments defined in set_list_conf
+        if (self.mode == "sim"):
+            pass
+        else:
+            # isseu the close command to the blind followed by an update to get blind readings
+            self.blind.Jog_down()
+
+
 
 # regular update of the status
 
@@ -294,23 +315,8 @@ class motionblinds(generic.FhemModule):
                     looptimer = 0
                     pass
                 else:
-                    blind = self.gw.device_list[self.mac]
                     self.changed = 0
                     looptimer = 0
-                    await fhem.readingsBeginUpdate(self.hash)
-                    for key in self.readings.keys():
-                        lacle = key
-                    # extract object attributes value if not defined their __dict__ value
-                        readingsname = self.readings[key]
-                        try: 
-                                # the attribute exists
-                                # evaluate its value from the blind dict
-                                valeur = eval(key)
-                                self.logger.debug(f"set self.readings[{key}] into reading {readingsname} = {valeur}")
-                                # set the reading in fhem's device
-                                await fhem.readingsBulkUpdate(self.hash, readingsname, valeur, 1)
-                        except AttributeError:
-                            pass
-                    await fhem.readingsEndUpdate(self.hash, 1)
+                    await self.__set_readings()
             looptimer += 1
             await asyncio.sleep(self._attr_UDPRxCheck)
