@@ -51,6 +51,7 @@ class motionblinds(generic.FhemModule):
         self.changed = 0
         self._attr_looptimer = 30
         self._attr_UDPRxCheck = 1
+        self.changed = 0
         return
 
 
@@ -141,6 +142,8 @@ class motionblinds(generic.FhemModule):
         await fhem.readingsBulkUpdateIfChanged(self.hash, "state", "up")
         await fhem.readingsEndUpdate(self.hash, 1)
 
+        # start update loop
+        self._updateloop = self.create_async_task(self.update_loop())
 
 # define the gateway and get the blind from the gateway and setiup the call back function for the milticast liste
 
@@ -203,8 +206,6 @@ class motionblinds(generic.FhemModule):
             # you can use self._attr_interval already with the new variable
         #    pass
 
-        # start update loop
-        self._updateloop = self.create_async_task(self.update_loop())
 
     async def set_up(self, hash, params):
         # no params argument here, as set_up doesn't have arguments defined in set_list_conf
@@ -214,7 +215,8 @@ class motionblinds(generic.FhemModule):
         else:
             # isseu the open command to the blind followed by an update to get blind readings
             self.blind.Open()
-        await fhem.readingsSingleUpdate(self.hash,"state", "up", 1)
+            self.blind.Update()
+        await fhem.readingsSingleUpdate(self.hash,"state", "Opening", 1)
         self.logger.debug("set_up:")
 
             
@@ -226,10 +228,11 @@ class motionblinds(generic.FhemModule):
             # issue the close command to the blind followed by an update to get blind readings
             self.logger.debug("set_down:")
             self.blind.Close()
+            self.blind.Update()
 
         # update FHM device readings
 #        self.blind.Update()
-        await fhem.readingsSingleUpdate(self.hash,"state", "down", 1)
+        await fhem.readingsSingleUpdate(self.hash,"state", "Closing", 1)
 #        await self.__set_readings()
 
     async def set_mode(self, hash, params):
@@ -247,7 +250,10 @@ class motionblinds(generic.FhemModule):
         if (self.blind.status == 'Closing') or (self.blind.status == 'Opening'):
             direction = "Stop_" + self.blind.status
             self.logger.info(f"set_Stop: with blind.status = {direction}")
-            await fhem.readingsSingleUpdate(self.hash,"direction", direction, 1)
+            await fhem.readingsBeginUpdate(self.hash)
+            await fhem.readingsBulkUpdate(self.hash, "direction", direction, 1)
+            await fhem.readingsBulkUpdate(self.hash, "state", direction, 1)
+            await fhem.readingsEndUpdate(self.hash, 1)
         if (self.mode == "sim"):
             pass
         else:
@@ -270,8 +276,10 @@ class motionblinds(generic.FhemModule):
 #        blind = self.gw.device_list[self.mac]
 
         self.blind.Set_position(position)
-
+        self.blind.Update()
         self.logger.debug(f"set_position: POSITION being set")
+
+
 
     async def set_jog_up(self, hash, params):
                 # no params argument here, as set_jog_up doesn't have arguments defined in set_list_conf
@@ -302,11 +310,18 @@ class motionblinds(generic.FhemModule):
                 if (self.mode == "sim"):
                     self.changed = 0
                     looptimer = 0
-                    pass
                 else:
+                    # reset the detection flag and timer
                     self.changed = 0
                     looptimer = 0
                     await self.__set_readings()
+                    if (self.blind.status == 'Closing') or (self.blind.status == 'Opening'):
+                        direction = "Stop_" + self.blind.status
+                        self.logger.info(f"set_Stop: with blind.status = {direction}")
+                        await fhem.readingsBeginUpdate(self.hash)
+                        await fhem.readingsBulkUpdate(self.hash, "direction", direction, 1)
+                        await fhem.readingsBulkUpdate(self.hash, "state", direction, 1)
+                        await fhem.readingsEndUpdate(self.hash, 1)
             elif (looptimer >= self._attr_looptimer):        
                 self.logger.debug(f"update_loop: looptimer reached {self._attr_looptimer} count")
                 if (self.mode == "sim"):
@@ -317,6 +332,6 @@ class motionblinds(generic.FhemModule):
                     self.blind.Update()        
                     await self.__set_readings()
             # either from UDP  message or Update, need to insert the readings
-            
+     
             looptimer += 1
             await asyncio.sleep(self._attr_UDPRxCheck)
