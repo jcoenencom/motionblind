@@ -52,6 +52,7 @@ class motionblinds(generic.FhemModule):
         self._attr_looptimer = 30
         self._attr_UDPRxCheck = 1
         self.changed = 0
+        self.direction=""
         return
 
 
@@ -113,9 +114,9 @@ class motionblinds(generic.FhemModule):
 
 #        await self.set_attr_config(self._attr_list)
         await self.set_icon("fts_garage_door_30")
-        await fhem.CommandAttr(hash, hash["NAME"] + " devStateIcon up:fts_garage_door_down:down down:fts_garage_door_up:up Stop_Opening:fts_shutter_down:down Stop_Closing:fts_shutter_up:up")
-        await fhem.CommandAttr(hash, hash["NAME"] + " webCmd Stop:position:jog_up:jog_down")
-        await fhem.CommandAttr(hash, hash['NAME'] + " cmdIcon Stop:rc_GREEN jog_up:edit_collapse jog_down:edit_expand")
+        await fhem.CommandAttr(hash, hash["NAME"] + " devStateIcon up:fts_garage_door_down:down down:fts_garage_door_up:up Stopped_Opening:fts_shutter_down:down Stopped_Closing:fts_shutter_up:up Opening:rc_GREEN:Stop Closing:rc_GREEN:Stop")
+        await fhem.CommandAttr(hash, hash["NAME"] + " webCmd position:jog_up:jog_down")
+#        await fhem.CommandAttr(hash, hash['NAME'] + " cmdIcon Stop:rc_GREEN jog_up:edit_collapse jog_down:edit_expand")
         await fhem.CommandAttr(hash, hash["NAME"] + " verbose 5")
 
     # check the defined attributes in the define command
@@ -250,10 +251,6 @@ class motionblinds(generic.FhemModule):
         if (self.blind.status == 'Closing') or (self.blind.status == 'Opening'):
             direction = "Stop_" + self.blind.status
             self.logger.info(f"set_Stop: with blind.status = {direction}")
-            await fhem.readingsBeginUpdate(self.hash)
-            await fhem.readingsBulkUpdate(self.hash, "direction", direction, 1)
-            await fhem.readingsBulkUpdate(self.hash, "state", direction, 1)
-            await fhem.readingsEndUpdate(self.hash, 1)
         if (self.mode == "sim"):
             pass
         else:
@@ -314,14 +311,7 @@ class motionblinds(generic.FhemModule):
                     # reset the detection flag and timer
                     self.changed = 0
                     looptimer = 0
-                    await self.__set_readings()
-                    if (self.blind.status == 'Closing') or (self.blind.status == 'Opening'):
-                        direction = "Stop_" + self.blind.status
-                        self.logger.info(f"set_Stop: with blind.status = {direction}")
-                        await fhem.readingsBeginUpdate(self.hash)
-                        await fhem.readingsBulkUpdate(self.hash, "direction", direction, 1)
-                        await fhem.readingsBulkUpdate(self.hash, "state", direction, 1)
-                        await fhem.readingsEndUpdate(self.hash, 1)
+#                    await self.__set_readings()
             elif (looptimer >= self._attr_looptimer):        
                 self.logger.debug(f"update_loop: looptimer reached {self._attr_looptimer} count")
                 if (self.mode == "sim"):
@@ -330,8 +320,41 @@ class motionblinds(generic.FhemModule):
                 else:
                     looptimer = 0
                     self.blind.Update()        
-                    await self.__set_readings()
+#                    await self.__set_readings()
+            await self.set_state()
             # either from UDP  message or Update, need to insert the readings
      
             looptimer += 1
             await asyncio.sleep(self._attr_UDPRxCheck)
+
+
+    async def set_state(self):
+        # set state of device:
+        # Opening - Closing - Stopped_Opening - Stopped_Closing - up - donw
+        state=""
+        if (self.blind.status == 'Closing') or (self.blind.status == 'Opening'):
+            self.direction = self.blind.status
+            state = self.direction
+            self.logger.info(f"set_state: with blind.direction = {self.direction}")
+        elif self.blind.status == 'Stopped':
+            if (self.blind.position == 0):
+                state="up"
+            elif (self.blind.position ==100):
+                state="down"            
+            else:
+                #we have stopped while moving, set direction to Stopped_previous motion
+                state = "Stopped"
+                self.logger.debug(f"update_loop: previous direction {self.direction} ***")
+                if (self.direction == "Stopped_Opening") or (self.direction == "Stopped_Closing"):
+                    state = self.direction
+                else:
+                    self.direction = "Stopped_" + self.direction
+                    self.logger.debug(f"update_loop: new direction {self.direction} ***")
+        self.logger.debug(f"update_loop: looptimer reached {self._attr_looptimer} count")
+        self.position = self.blind.position
+        await fhem.readingsBeginUpdate(self.hash)
+        await fhem.readingsBulkUpdate(self.hash, "direction", self.direction, 1)
+        await fhem.readingsBulkUpdate(self.hash, "state", state, 1)
+        await fhem.readingsBulkUpdate(self.hash, "status", self.blind.status, 1)
+        await fhem.readingsBulkUpdate(self.hash, "position", self.position)
+        await fhem.readingsEndUpdate(self.hash, 1)
