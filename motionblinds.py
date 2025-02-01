@@ -299,8 +299,8 @@ class motionblinds(generic.FhemModule):
 # regular update of the status
 
     async def update_loop(self):
-
-        looptimer = 0
+#start with looptimer reached so that we start with an update ofblind status
+        looptimer = self._attr_looptimer
         while True:
             if (self.changed !=0): 
                 self.logger.info(f"update_loop: UDP message processing: {self.blind}")
@@ -347,9 +347,15 @@ class motionblinds(generic.FhemModule):
                 self.logger.debug(f"update_loop: previous direction {self.direction} ***")
                 if (self.direction == "Stopped_Opening") or (self.direction == "Stopped_Closing"):
                     state = self.direction
-                else:
+                elif self.direction != "":
                     self.direction = "Stopped_" + self.direction
                     self.logger.debug(f"update_loop: new direction {self.direction} ***")
+                else:
+                    if self.position < 50:
+                        state = "down"
+                    else:
+                        state="up"
+        
         self.logger.debug(f"update_loop: looptimer reached {self._attr_looptimer} count")
         self.position = self.blind.position
         await fhem.readingsBeginUpdate(self.hash)
