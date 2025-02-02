@@ -2,6 +2,7 @@ import asyncio
 import threading
 from motionblinds import MotionGateway, MotionBlind, MotionMulticast
 import re
+
 from .. import fhem, generic
 
 
@@ -52,7 +53,7 @@ class motionblinds(generic.FhemModule):
         self._attr_UDPRxCheck = 1
         self.changed = 0
         self.direction=""
-
+        self.loop = asyncio.get_event_loop()
         return
 
 
@@ -67,6 +68,7 @@ class motionblinds(generic.FhemModule):
 
         self.logger.info(f"Rcvd Multicast message from blind {self.blind}")
         # set the flag indicating an UDP message has been received
+        future = asyncio.run_coroutine_threadsafe(self.set_state(), self.loop)
         self.logger.info(f"Set change flag")
         self.changed = 1
 
@@ -88,7 +90,7 @@ class motionblinds(generic.FhemModule):
         await fhem.CommandAttr(hash, hash["NAME"] + " devStateIcon up:fts_garage_door_down:down down:fts_garage_door_up:up Stopped_Opening:fts_shutter_down:down Stopped_Closing:fts_shutter_up:up Opening:rc_GREEN:Stop Closing:rc_GREEN:Stop")
         await fhem.CommandAttr(hash, hash["NAME"] + " webCmd position:jog_up:jog_down")
 #        await fhem.CommandAttr(hash, hash['NAME'] + " cmdIcon Stop:rc_GREEN jog_up:edit_collapse jog_down:edit_expand")
-        await fhem.CommandAttr(hash, hash["NAME"] + " verbose 0")
+        await fhem.CommandAttr(hash, hash["NAME"] + " verbose 5")
 
     # check the defined attributes in the define command
     # DEFINE name fhempy motionblinds IP KEY MAC DEVICE_TYPE
@@ -108,7 +110,7 @@ class motionblinds(generic.FhemModule):
         
 
         # start update loop
-        self._updateloop = self.create_async_task(self.update_loop())
+#        self._updateloop = self.create_async_task(self.update_loop())
 
 # define the gateway and get the blind from the gateway and setiup the call back function for the milticast liste
 
@@ -256,7 +258,6 @@ class motionblinds(generic.FhemModule):
             looptimer += 1
 #            self.logger.debug(f"update_loop: looptimer reached {looptimer} count")
             await asyncio.sleep(self._attr_UDPRxCheck)
-
 
     async def set_state(self):
         # set state of device:
