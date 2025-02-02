@@ -46,14 +46,13 @@ class motionblinds(generic.FhemModule):
         self.mac = None
         self.devType = None
         self.max_angle = 0
-        self.mode = None
         self.position = 0
         self.changed = 0
         self._attr_looptimer = 30
         self._attr_UDPRxCheck = 1
         self.changed = 0
         self.direction=""
-        self.Backgroundtask = set()
+
         return
 
 
@@ -70,36 +69,6 @@ class motionblinds(generic.FhemModule):
         # set the flag indicating an UDP message has been received
         self.logger.info(f"Set change flag")
         self.changed = 1
-
-    async def __set_readings(self):
-        # loop through the __dict__ keys and set the value according to the key name for exampe "blind.device_type": "type" will provide a key blind.device_type and a reading's name type
-        # reading(type) is set to eval(blind.device_type)
-        # prepare for the update of the readings
-        await fhem.readingsBeginUpdate(self.hash)
-        valeur = None
-        readingsname = None
-        self.gw.Update()
-        blind = self.blind
-#        blind.Update()
-        self.logger.debug(f"__set_readings {blind}")
-#        self.logger.debug(f"__set_readings calling blind.Update()")
-#        blind.Update()
-        for key in self.readings.keys():
-            lacle = key
-        # extract object attributes value if not defined their __dict__ value
-            readingsname = self.readings[key]
-            try: 
-                    # the attribute exists
-                    # evaluate its value from the blind dict
-                    valeur = eval(key)
-#                    self.logger.debug(f"set self.readings[{key}] into reading {readingsname} = {valeur}")
-                    # set the reading in fhem's device
-                    await fhem.readingsBulkUpdate(self.hash, readingsname, valeur, 1)
-            except AttributeError:
-                pass
-#        self.logger.debug(f"storing battery_level = {blind.battery_level}")
-        await fhem.readingsBulkUpdate(self.hash, "battery_level", blind.battery_level, 1)
-        await fhem.readingsEndUpdate(self.hash, 1)
 
 
     # FHEM FUNCTION
@@ -119,7 +88,7 @@ class motionblinds(generic.FhemModule):
         await fhem.CommandAttr(hash, hash["NAME"] + " devStateIcon up:fts_garage_door_down:down down:fts_garage_door_up:up Stopped_Opening:fts_shutter_down:down Stopped_Closing:fts_shutter_up:up Opening:rc_GREEN:Stop Closing:rc_GREEN:Stop")
         await fhem.CommandAttr(hash, hash["NAME"] + " webCmd position:jog_up:jog_down")
 #        await fhem.CommandAttr(hash, hash['NAME'] + " cmdIcon Stop:rc_GREEN jog_up:edit_collapse jog_down:edit_expand")
-        await fhem.CommandAttr(hash, hash["NAME"] + " verbose 5")
+        await fhem.CommandAttr(hash, hash["NAME"] + " verbose 0")
 
     # check the defined attributes in the define command
     # DEFINE name fhempy motionblinds IP KEY MAC DEVICE_TYPE
@@ -134,16 +103,9 @@ class motionblinds(generic.FhemModule):
         hash['Device_Type'] =  self.devtype
         self.hash = hash
 
-#initial mode is live
-
-        self.mode = "live"
         if len(args) < 5:
             return "Usage: define brel fhempy test"
         
-        await fhem.readingsBeginUpdate(self.hash)
-        await fhem.readingsBulkUpdateIfChanged(self.hash, "mode", "live")
-        await fhem.readingsBulkUpdateIfChanged(self.hash, "state", "up")
-        await fhem.readingsEndUpdate(self.hash, 1)
 
         # start update loop
         self._updateloop = self.create_async_task(self.update_loop())
@@ -154,11 +116,20 @@ class motionblinds(generic.FhemModule):
         motion_multicast.Start_listen()
         self.gw = MotionGateway(ip = self.IP, key = self.key, multicast = motion_multicast)
 
-        self.gw.Update()
 
+# udpdate gateway to get the actual devicel list
+        self.gw.Update()
         self.blind = self.gw.device_list[self.mac]
+
+# register the callback for UDP messages
         self.blind.Register_callback("1", self.callback_func_blind)
 
+# Update the blind to get its current readings, they will be received using the callback and processeed in the loop
+
+        self.blind.Update()
+
+
+# set the specific attributes looptimer and UDPRxCheck timer
         attr_config = {
             "looptimer": {
                 "default": 30,
@@ -173,8 +144,11 @@ class motionblinds(generic.FhemModule):
             }
 
         await self.set_attr_config(attr_config)
+# set to default value        
         await fhem.CommandAttr(hash, hash["NAME"] + f" UDPRxCheck {self._attr_UDPRxCheck}")
         await fhem.CommandAttr(hash, hash["NAME"] + f" looptimer {self._attr_looptimer}")
+
+# command configuration
 
         set_config = {
             "up": {},
@@ -191,14 +165,6 @@ class motionblinds(generic.FhemModule):
             
         }
         await self.set_set_config(set_config)
-        self.logger.info(f"Call __set_readings for device Device {self.mac} being created")
-#        await self.__set_readings()
-        # Attribute function format: set_attr_NAMEOFATTRIBUTE(self, hash)
-        # self._attr_NAMEOFATTRIBUTE contains the new state
-        #async def set_attr_IP(self, hash):
-            # attribute was set to self._attr_IP
-            # you can use self._attr_interval already with the new variable
-        #    pass
 
 
     async def set_up(self, hash, params):
@@ -218,28 +184,23 @@ class motionblinds(generic.FhemModule):
         self.blind.Close()
         self.blind.Update()
 
-        # update FHM device readings
+# update FHEM device readings
 #        self.blind.Update()
         await fhem.readingsSingleUpdate(self.hash,"state", "Closing", 1)
-#        await self.__set_readings()
 
-    async def set_mode(self, hash, params):
-        # user can specify mode as mode=eco or just eco as argument
-        # params['mode'] contains the mode provided by user
-        self.mode = params["mode"]
-        await fhem.readingsSingleUpdate(hash, "mode", self.mode, 1)
+
  
     async def set_status(self, hash, params):
         # get the state of the blind
+        self.logger.info("Request blind status")
         self.blind.Update()
-        await self.__set_readings()
 
     async def set_Stop(self,hash,params):
         if (self.blind.status == 'Closing') or (self.blind.status == 'Opening'):
             direction = "Stop_" + self.blind.status
             self.logger.info(f"set_Stop: with blind.status = {direction}")
-        self.blind.Update()
         self.blind.Stop()
+        self.blind.Update()
 
 # get the status os the blind
         await self.set_status(hash,params)
@@ -247,8 +208,6 @@ class motionblinds(generic.FhemModule):
     async def set_position(self, hash, params):
         position = params["position"]
         self.logger.debug(f"set_position: SET POSITION AT {position}")
-        self.blind.Update()
-        
         for key in params.keys():
             self.logger.debug(f"params[{key}]")
         
@@ -290,7 +249,7 @@ class motionblinds(generic.FhemModule):
 #                self.logger.debug(f"update_loop: looptimer {looptimer} reached {self._attr_looptimer} count")
                 looptimer = 0
                 self.blind.Update()        
-#                    await self.__set_readings()
+
                 await self.set_state()
             # either from UDP  message or Update, need to insert the readings
      
