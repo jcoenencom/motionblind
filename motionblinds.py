@@ -90,7 +90,7 @@ class motionblinds(generic.FhemModule):
         await fhem.CommandAttr(hash, hash["NAME"] + " devStateIcon up:fts_garage_door_down:down down:fts_garage_door_up:up Stopped_Opening:fts_shutter_down:down Stopped_Closing:fts_shutter_up:up Opening:rc_GREEN:Stop Closing:rc_GREEN:Stop")
         await fhem.CommandAttr(hash, hash["NAME"] + " webCmd position:jog_up:jog_down")
 #        await fhem.CommandAttr(hash, hash['NAME'] + " cmdIcon Stop:rc_GREEN jog_up:edit_collapse jog_down:edit_expand")
-        await fhem.CommandAttr(hash, hash["NAME"] + " verbose 5")
+        await fhem.CommandAttr(hash, hash["NAME"] + " verbose 0")
 
     # check the defined attributes in the define command
     # DEFINE name fhempy motionblinds IP KEY MAC DEVICE_TYPE
