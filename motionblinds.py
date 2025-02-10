@@ -282,13 +282,13 @@ class motionblinds(generic.FhemModule):
                 state="down"            
             else:
                 #we have stopped while moving, set direction to Stopped_previous motion
-                state = "Stopped"
                 self.logger.info(f"set_state: previous direction {self.direction} ***")
                 if (self.direction == "Stopped_Opening") or (self.direction == "Stopped_Closing"):
                     state = self.direction
                     self.logger.info(f"set_state: detected previous Stopped {self.direction} ***")
                 elif self.direction != "":
                    self.direction = "Stopped_" + self.direction
+                   state = self.direction
                    self.logger.info(f"set_state: new direction {self.direction} ***")
                 else:
                     self.logger.info(f"set_state: Not Stopped and not empty position  {self.position} ***")
