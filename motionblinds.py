@@ -1,6 +1,6 @@
 import asyncio
 import threading
-from motionblinds import MotionGateway, MotionBlind, MotionMulticast
+from motionblinds import MotionGateway, MotionMulticast
 import re
 
 from .. import fhem, generic
@@ -9,7 +9,7 @@ from .. import fhem, generic
 class motionblinds(generic.FhemModule):
 
     devtypes = {"02000001":"Gateway", "02000002":"Gateway","10000000":"Standard Blind", "10000001":"Top/Down Bottom/Up", "10000002":"Double Roller"}
-    readings = {"blind.blind_type": "type", "blind.status": "status", "blind.position": "position", "blind.angle": "angle", "blind.limit_status":"limits", "blind.battery_voltage": "battery_voltage", "blind.battey_level":"battery_level", "blind.is_charging":"is_charging", "blind.RSSI":"RSSI"}
+    readings = {"blind.blind_type": "type", "blind.status": "status", "blind.position": "position", "blind.angle": "angle", "blind.limit_status":"limits", "blind.battery_voltage": "battery_voltage", "blind.battery_level":"battery_level", "blind.is_charging":"is_charging", "blind.RSSI":"RSSI"}
 
     blindtype = ["RollerBlind",
         "VenetianBlind",
@@ -43,7 +43,6 @@ class motionblinds(generic.FhemModule):
         self.key = None
         self.IP = None
         self.gw = MotionGateway
-        self.blind = MotionBlind
         self.mac = None
         self.devType = None
         self.max_angle = 0
@@ -68,8 +67,10 @@ class motionblinds(generic.FhemModule):
 
         self.logger.info(f"Rcvd Multicast message from blind {self.blind}")
         # set the flag indicating an UDP message has been received
+
         future = asyncio.run_coroutine_threadsafe(self.set_state(), self.loop)
         self.logger.info(f"Set change flag")
+
         self.changed = 1
 
 
@@ -89,7 +90,7 @@ class motionblinds(generic.FhemModule):
         await self.set_icon("fts_garage_door_30")
         await fhem.CommandAttr(hash, hash["NAME"] + " devStateIcon up:fts_garage_door_down:down down:fts_garage_door_up:up Stopped_Opening:fts_shutter_down:down Stopped_Closing:fts_shutter_up:up Opening:rc_GREEN:Stop Closing:rc_GREEN:Stop")
         await fhem.CommandAttr(hash, hash["NAME"] + " webCmd position:jog_up:jog_down")
-#        await fhem.CommandAttr(hash, hash['NAME'] + " cmdIcon Stop:rc_GREEN jog_up:edit_collapse jog_down:edit_expand")
+        await fhem.CommandAttr(hash, hash['NAME'] + " cmdIcon Stop:rc_GREEN jog_up:edit_collapse jog_down:edit_expand")
         await fhem.CommandAttr(hash, hash["NAME"] + " verbose 0")
 
     # check the defined attributes in the define command
@@ -248,7 +249,7 @@ class motionblinds(generic.FhemModule):
                 looptimer = 0
                 await self.set_state()
             elif (looptimer >= int(self._attr_looptimer)):        
-#                self.logger.debug(f"update_loop: looptimer {looptimer} reached {self._attr_looptimer} count")
+                self.logger.debug(f"update_loop: looptimer {looptimer} reached {self._attr_looptimer} count")
                 looptimer = 0
                 self.blind.Update()        
 
@@ -256,42 +257,56 @@ class motionblinds(generic.FhemModule):
             # either from UDP  message or Update, need to insert the readings
      
             looptimer += 1
-#            self.logger.debug(f"update_loop: looptimer reached {looptimer} count")
+            self.logger.debug(f"update_loop: looptimer reached {looptimer} count")
             await asyncio.sleep(self._attr_UDPRxCheck)
 
     async def set_state(self):
         # set state of device:
         # Opening - Closing - Stopped_Opening - Stopped_Closing - up - donw
-        state=""
-        if (self.blind.status == 'Closing') or (self.blind.status == 'Opening'):
-            self.direction = self.blind.status
-            self.position = self.blind.position
-            state = self.direction
+        blind = self.blind
+        self.position = blind.position
+        state = ""
+        status = blind.status
+        self.logger.info(f"set_state: Blind Status  = {status} Position {self.blind.position} direction {self.direction}")
+        self.logger.info(f"set_state: blind  = {self.blind}")
+
+        if (status == 'Closing') or (status == 'Opening'):
+            self.direction = status
+            state = status
             self.logger.info(f"set_state: with blind.direction = {self.direction}")
-        elif self.blind.status == 'Stopped':
-            if (self.blind.position == 0):
+        elif status == 'Stopped':
+            self.logger.info(f"set_state: Stopped with direction, charging  = {blind.is_charging}")
+            if (self.position == 0):
                 state="up"
-            elif (self.blind.position ==100):
+            elif (self.position == 100):
                 state="down"            
             else:
                 #we have stopped while moving, set direction to Stopped_previous motion
                 state = "Stopped"
-                self.logger.debug(f"update_loop: previous direction {self.direction} ***")
+                self.logger.info(f"set_state: previous direction {self.direction} ***")
                 if (self.direction == "Stopped_Opening") or (self.direction == "Stopped_Closing"):
                     state = self.direction
+                    self.logger.info(f"set_state: detected previous Stopped {self.direction} ***")
                 elif self.direction != "":
                    self.direction = "Stopped_" + self.direction
-                   self.logger.debug(f"update_loop: new direction {self.direction} ***")
+                   self.logger.info(f"set_state: new direction {self.direction} ***")
                 else:
+                    self.logger.info(f"set_state: Not Stopped and not empty position  {self.position} ***")
                     if self.position < 50:
                         state = "down"
                     else:
                         state="up"
-        
-        self.position = self.blind.position
+                
+        self.logger.info(f"set_state: stae  = {state}")
+
         await fhem.readingsBeginUpdate(self.hash)
-        await fhem.readingsBulkUpdate(self.hash, "direction", self.direction, 1)
-        await fhem.readingsBulkUpdate(self.hash, "state", state, 1)
-        await fhem.readingsBulkUpdate(self.hash, "status", self.blind.status, 1)
-        await fhem.readingsBulkUpdate(self.hash, "position", self.position)
+        await fhem.readingsBulkUpdate(self.hash, "direction", self.direction)
+        await fhem.readingsBulkUpdate(self.hash, "state", state)
+        for key in self.readings.keys():
+            valeur = eval(str(key))
+            reading = str(key).split(".")
+            self.logger.info((f"{reading[1]} = {valeur}"))
+            await fhem.readingsBulkUpdate(self.hash, reading[1], valeur)
         await fhem.readingsEndUpdate(self.hash, 1)
+
+        
