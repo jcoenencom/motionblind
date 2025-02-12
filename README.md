@@ -70,3 +70,5 @@ The module should normally come up.
 ## State of development:
 
 Use motiongw module to discover the gateway and its active devices
+
+Each device modue listen to its UDP messages, when a message is recevied, the blind's parameters are read and transferred to FHEM's device readings
